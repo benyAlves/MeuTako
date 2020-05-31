@@ -1,0 +1,167 @@
+{
+  "project_info": {
+    "project_number": "405832661950",
+    "firebase_url": "https://projectofirebase.firebaseio.com",
+    "project_id": "projectofirebase",
+    "storage_bucket": "projectofirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405832661950:android:03b52a35e159df3474d7ef",
+        "android_client_info": {
+          "package_name": "android.example.com.squawker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405832661950-77p0msekhssth12e3loibibs56o7emsa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "android.example.com.squawker",
+            "certificate_hash": "77c21342ea076581536970a1a979ecaf1d7bc3ec"
+          }
+        },
+        {
+          "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOlXcO7teXlziVcoiB_nzSrVoOKg68bRs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405832661950:android:76a290763fe9ed19",
+        "android_client_info": {
+          "package_name": "challenge.code.andela.udacity.journalapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405832661950-9ijc94s7k8undvhi19lok93cahrqmpt8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "challenge.code.andela.udacity.journalapp",
+            "certificate_hash": "61d934f6e1d18bdc75735cea006bf7051b6021aa"
+          }
+        },
+        {
+          "client_id": "405832661950-oict34uts2ps2g2ktv5h0hqibev49qvi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "challenge.code.andela.udacity.journalapp",
+            "certificate_hash": "b162358c35fabb79d7ef1b2ba79a1b86f1bc6ec3"
+          }
+        },
+        {
+          "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOlXcO7teXlziVcoiB_nzSrVoOKg68bRs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405832661950:android:64e58dacc0483faa",
+        "android_client_info": {
+          "package_name": "com.google.firebase.udacity.friendlychat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405832661950-t0qdq39t85bjchskdlkgad66badlimcs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.google.firebase.udacity.friendlychat",
+            "certificate_hash": "b162358c35fabb79d7ef1b2ba79a1b86f1bc6ec3"
+          }
+        },
+        {
+          "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOlXcO7teXlziVcoiB_nzSrVoOKg68bRs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405832661950:android:70e38865673707b074d7ef",
+        "android_client_info": {
+          "package_name": "com.udacity.maluleque.meutako"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405832661950-2c0mio3vag3os0qutho64ljok3ght624.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.udacity.maluleque.meutako",
+            "certificate_hash": "77c21342ea076581536970a1a979ecaf1d7bc3ec"
+          }
+        },
+        {
+          "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOlXcO7teXlziVcoiB_nzSrVoOKg68bRs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405832661950-j9ub3t90e3mp1da4ivqvors5tgddteo9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
