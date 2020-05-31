@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#607D8B</color>
+    <color name="colorPrimaryDark">#455A64</color>
+    <color name="colorAccent">#8BC34A</color>
+    <color name="colorSecondaryText">#757575</color>
+    <color name="colorPrimaryText">#212121</color>
+
+    <!-- dots inactive colors -->
+    <color name="dot_inactive">#fff</color>
+
+    <!-- dots active colors -->
+    <color name="dot_active">#607D8B</color>
+</resources>

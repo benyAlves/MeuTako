@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">MeuTako</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+    <string name="start">Got it</string>
+    <string name="track_all_your_expenses_and_incomes">Track all your expenses and incomes</string>
+    <string name="manage_transactions">Manage Transactions</string>
+    <string name="get_reminded">Get Reminded</string>
+    <string name="get_reminded_every_day_to_track_transactions">Get reminded every day to track transactions</string>
+    <string name="aggregated_history">Aggregated history</string>
+    <string name="aggregated_info_and_be_aware_about_your_expenses_and_incomes">Aggregated info and be aware about your expenses and incomes</string>
+</resources>
