@@ -1,6 +1,8 @@
 package com.udacity.maluleque.meutako;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,7 +20,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.udacity.maluleque.meutako.model.Category;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,6 +62,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private AlertDialog.Builder builder;
     private String selectedCategory;
+    private Date date;
 
 
     @Override
@@ -78,12 +85,41 @@ public class AddTransactionActivity extends AppCompatActivity {
         });
 
 
-        textInputLayoutCategory.setOnClickListener(v -> {
+        categoryInputText.setOnClickListener(v -> {
             if (transactionType != null) {
                 builder.show();
             }
         });
 
+        dataInputText.setOnClickListener(v -> {
+            selectDate();
+        });
+
+        setDefaultDate();
+
+    }
+
+    private void setDefaultDate() {
+        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMMyyyy");
+        SimpleDateFormat dayMonth = new SimpleDateFormat(pattern);
+        dataInputText.setText(dayMonth.format(new Date()));
+    }
+
+    private void selectDate() {
+        final Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        DatePickerDialog picker = new DatePickerDialog(this,
+                (view, year1, monthOfYear, dayOfMonth) -> {
+                    String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMMyyyy");
+                    SimpleDateFormat dayMonth = new SimpleDateFormat(pattern);
+                    calendar.set(year1, monthOfYear, dayOfMonth);
+                    dataInputText.setText(dayMonth.format(calendar.getTime()));
+                },
+                year, month, day);
+        picker.show();
     }
 
     private void getCategories(String transactionType) {
