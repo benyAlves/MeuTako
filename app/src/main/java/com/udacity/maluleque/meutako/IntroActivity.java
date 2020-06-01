@@ -35,6 +35,7 @@ public class IntroActivity extends AppCompatActivity {
     @BindView(R.id.btn_next)
     Button btnNext;
     private int[] layouts;
+    private PreferencesManager preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +43,12 @@ public class IntroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_intro);
         ButterKnife.bind(this);
 
-        PreferencesManager preferences = PreferencesManager.getInstance(getSharedPreferences(LAUNCH_PREF, MODE_PRIVATE));
+        preferences = PreferencesManager.getInstance(getSharedPreferences(LAUNCH_PREF, MODE_PRIVATE));
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         if (!preferences.isFirstLaunch()) {
             openTransactionScreen();
-            finish();
         }
 
         layouts = new int[]{
@@ -135,6 +135,7 @@ public class IntroActivity extends AppCompatActivity {
 
 
     private void openTransactionScreen() {
+        preferences.setFirstLaunch(false);
         Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
         finish();
