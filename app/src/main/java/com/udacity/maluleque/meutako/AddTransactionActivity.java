@@ -8,18 +8,14 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.udacity.maluleque.meutako.model.Category;
 
 import java.util.ArrayList;
@@ -84,7 +80,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         textInputLayoutCategory.setOnClickListener(v -> {
             if (transactionType != null) {
-                Log.d(TAG, " " + transactionType);
+                builder.show();
             }
         });
 
@@ -93,19 +89,16 @@ public class AddTransactionActivity extends AppCompatActivity {
     private void getCategories(String transactionType) {
         db.collection("categories").whereEqualTo("type", transactionType)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        ArrayList<String> categories = new ArrayList<>();
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Category category = document.toObject(Category.class);
-                                categories.add(category.getName());
-                            }
-                            prepareCategoriesDialog(categories);
-                        } else {
-                            Log.e(TAG, "Error getting documents: ", task.getException());
+                .addOnCompleteListener(task -> {
+                    ArrayList<String> categories = new ArrayList<>();
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Category category = document.toObject(Category.class);
+                            categories.add(category.getName());
                         }
+                        prepareCategoriesDialog(categories);
+                    } else {
+                        Log.e(TAG, "Error getting documents: ", task.getException());
                     }
                 });
     }
@@ -116,7 +109,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.select_category)
-                .setItems(items, (dialog, which) -> selectedCategory = categories.get(which));
+                .setItems(items, (dialog, which) -> categoryInputText.setText(categories.get(which)));
         builder.create();
 
     }
