@@ -25,6 +25,7 @@ public class PreferencesManager {
 
     public void setFirstLaunch(boolean isFirstTime) {
         editor.putBoolean(IS_FIRST_TIME_LAUNCH, isFirstTime);
+        editor.commit();
     }
 
     public boolean isFirstLaunch() {

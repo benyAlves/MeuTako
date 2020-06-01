@@ -48,7 +48,7 @@ public class IntroActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         if (!preferences.isFirstLaunch()) {
-            openTransactionScreen();
+            openSignInScreen();
         }
 
         layouts = new int[]{
@@ -65,14 +65,14 @@ public class IntroActivity extends AppCompatActivity {
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
 
-        btnSkip.setOnClickListener(v -> openTransactionScreen());
+        btnSkip.setOnClickListener(v -> openSignInScreen());
 
         btnNext.setOnClickListener(v -> {
             int current = getItem(+1);
             if (current < layouts.length) {
                 viewPager.setCurrentItem(current);
             } else {
-                openTransactionScreen();
+                openSignInScreen();
             }
         });
     }
@@ -134,7 +134,7 @@ public class IntroActivity extends AppCompatActivity {
     }
 
 
-    private void openTransactionScreen() {
+    private void openSignInScreen() {
         preferences.setFirstLaunch(false);
         Intent intent = new Intent(this, SignInActivity.class);
         startActivity(intent);
