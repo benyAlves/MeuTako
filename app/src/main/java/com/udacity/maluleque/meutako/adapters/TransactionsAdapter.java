@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.udacity.maluleque.meutako.R;
 import com.udacity.maluleque.meutako.model.Transaction;
 import com.udacity.maluleque.meutako.utils.DateUtils;
+import com.udacity.maluleque.meutako.utils.NumberUtils;
 
 import org.zakariya.stickyheaders.SectioningAdapter;
 
@@ -22,8 +23,8 @@ import butterknife.ButterKnife;
 
 public class TransactionsAdapter extends SectioningAdapter {
 
-    private final List<Transaction> transactions;
-    ArrayList<Section> sections;
+    private List<Transaction> transactions;
+    private ArrayList<Section> sections;
 
     public TransactionsAdapter(Context context, List<Transaction> transactions) {
         this.transactions = transactions;
@@ -47,6 +48,7 @@ public class TransactionsAdapter extends SectioningAdapter {
     }
 
 
+
     private void preecheSeccoes() {
         List<String> list = new ArrayList<>(new HashSet<>(datesSectionList()));
 
@@ -56,6 +58,11 @@ public class TransactionsAdapter extends SectioningAdapter {
             section.header = list.get(i);
             sections.add(section);
 
+            for (int j = 0; j < transactions.size(); j++) {
+                if (section.header.equalsIgnoreCase(DateUtils.getDataDayMonth(transactions.get(j).getDate()))) {
+                    section.items.add(transactions.get(j));
+                }
+            }
         }
     }
 
@@ -69,10 +76,10 @@ public class TransactionsAdapter extends SectioningAdapter {
 
     @Override
     public void onBindItemViewHolder(SectioningAdapter.ItemViewHolder viewHolder, int sectionIndex, final int itemIndex, int itemType) {
-        final Transaction s = transactions.get(itemIndex);
+        final Transaction s = sections.get(sectionIndex).items.get(itemIndex);
         final TransactionItemViewHolder holder = (TransactionItemViewHolder) viewHolder;
 
-        holder.textViewAmount.setText(s.getAmount() + "");
+        holder.textViewAmount.setText(NumberUtils.getFormattedAmount(s.getAmount()));
         holder.textViewCategory.setText(s.getCategory());
         holder.textViewType.setText(s.getType());
 
@@ -103,7 +110,6 @@ public class TransactionsAdapter extends SectioningAdapter {
     }
 
     private class Section {
-        public double total = 0;
         int index;
         String header;
         List<Transaction> items = new ArrayList<>();
