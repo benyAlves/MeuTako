@@ -16,7 +16,8 @@ import com.udacity.maluleque.meutako.utils.DateUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
+
+public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener, TransactionListFragment.FabButtonVisibilityListener {
 
     private static final String TAG = "MainActivity";
     @BindView(R.id.fab)
@@ -53,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
         Log.i(TAG, "onTabSelected " + tab.getPosition());
+        TransactionListFragment tListFragment = (TransactionListFragment) adapter.getItem(tab.getPosition());
+        Log.i(TAG, "onTabSelected " + tListFragment.getArguments().getString("param2"));
     }
 
     @Override
@@ -64,4 +67,15 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     public void onTabReselected(TabLayout.Tab tab) {
         Log.i(TAG, "onTabReselected " + tab.getPosition());
     }
+
+    @Override
+    public void hideFabButton() {
+        fab.hide();
+    }
+
+    @Override
+    public void showFabButton() {
+        fab.show();
+    }
+
 }
