@@ -2,8 +2,14 @@ package com.udacity.maluleque.meutako.utils;
 
 import android.text.format.DateFormat;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 public class DateUtils {
@@ -13,4 +19,65 @@ public class DateUtils {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
         return simpleDateFormat.format(date);
     }
+
+    public static String formatDateMonth(Date date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
+        return simpleDateFormat.format(date);
+    }
+
+    public static Date formatDateMonth(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
+        try {
+            return simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String lastMonth() {
+        Calendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.MONTH, -1);
+        return formatDateMonth(calendar.getTime());
+    }
+
+    public static String thisMonth() {
+        Calendar calendar = new GregorianCalendar();
+        return formatDateMonth(calendar.getTime());
+    }
+
+    public static String nextMonth() {
+        Calendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.MONTH, 1);
+        return formatDateMonth(calendar.getTime());
+    }
+
+    public static String getDataDayMonth(long date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
+        Date d = new Date(date);
+        return formatter.format(d);
+    }
+
+    public static List<String> generateDates() {
+        List<String> dates = new ArrayList<>();
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.MONTH, 1);
+
+        dates.add(formatDateMonth(calendar.getTime()));
+
+        calendar = new GregorianCalendar();
+
+        dates.add(formatDateMonth(calendar.getTime()));
+
+        for (int i = 0; i < 10; i++) {
+            calendar.add(Calendar.MONTH, -1);
+            dates.add(formatDateMonth(calendar.getTime()));
+        }
+        Collections.reverse(dates);
+
+        return dates;
+    }
+
+
 }

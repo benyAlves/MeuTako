@@ -12,7 +12,6 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.udacity.maluleque.meutako.model.User;
 
@@ -65,9 +64,10 @@ public class SignInActivity extends AppCompatActivity {
     private void saveUserInDatabase(FirebaseUser firebaseUser) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        DocumentReference userDocument = db.collection("users").document();
-        User user = new User(userDocument.getId(), firebaseUser.getDisplayName(), firebaseUser.getPhoneNumber());
-        userDocument.set(user).addOnCompleteListener(task -> {
+        User user = new User(firebaseUser.getUid(), firebaseUser.getDisplayName(), firebaseUser.getPhoneNumber());
+        db.collection("users")
+                .document(firebaseUser.getUid())
+                .set(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 startActivity(new Intent(SignInActivity.this, MainActivity.class));
                 finish();

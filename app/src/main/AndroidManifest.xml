@@ -3,10 +3,13 @@
     package="com.udacity.maluleque.meutako">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
 
     <application
@@ -16,14 +19,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.udacity.maluleque.meutako.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
+
         <activity
             android:name=".AddTransactionActivity"
             android:label="@string/title_activity_add_transaction"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
+
         <activity android:name=".SignInActivity" />
-        <activity android:name=".MainActivity" />
+
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".IntroActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
