@@ -1,6 +1,7 @@
 package com.udacity.maluleque.meutako.utils;
 
 import android.text.format.DateFormat;
+import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,6 +57,25 @@ public class DateUtils {
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
         Date d = new Date(date);
         return formatter.format(d);
+    }
+
+    public static long[] getDateIntervals(String date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
+        long[] dates = new long[2];
+        try {
+            Date convertedDate = formatter.parse(date);
+            dates[0] = convertedDate.getTime();
+
+            Calendar c = Calendar.getInstance();
+            c.setTime(convertedDate);
+            c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+            dates[1] = c.getTime().getTime();
+            return dates;
+        } catch (ParseException e) {
+            Log.e("DateUtils ", "Error parsing date", e);
+            return dates;
+        }
     }
 
     public static List<String> generateDates() {

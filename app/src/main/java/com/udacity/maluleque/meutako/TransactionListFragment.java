@@ -10,21 +10,18 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.udacity.maluleque.meutako.adapters.TransactionsAdapter;
 import com.udacity.maluleque.meutako.model.Transaction;
+import com.udacity.maluleque.meutako.utils.DateUtils;
 
 import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
 
@@ -36,7 +33,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class TransactionListFragment extends Fragment {
+public class TransactionListFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener, TransactionsAdapter.OnResumeClickListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String TAG = "TransactionListFragment";
@@ -119,14 +116,14 @@ public class TransactionListFragment extends Fragment {
             }
         });
 
-        initDataLoading();
+        initDataLoading(dataMonth);
 
         return view;
     }
 
-    private void initDataLoading() {
+    private void initDataLoading(String dataMonth) {
         // if(NetworkUtils.hasInternetConnection(getContext())) {
-        getTransactions();
+        getTransactions(dataMonth);
         /*}else {
             showNoInternet();
         }*/
@@ -134,7 +131,7 @@ public class TransactionListFragment extends Fragment {
 
     @OnClick(R.id.btnTryAgain)
     public void tryAgain() {
-        initDataLoading();
+        initDataLoading(dataMonth);
     }
 
     @Override
@@ -147,49 +144,37 @@ public class TransactionListFragment extends Fragment {
         }
     }
 
-    void getTransactions() {
+    void getTransactions(String dataMonth) {
         showProgressBar();
-
-   /*     TODO SimpleDateFormat dateFormat = new SimpleDateFormat("MMM yyyy");
-
-        try {
-            Date convertedDate = null; convertedDate = dateFormat.parse(dataMonth);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        Calendar c = Calendar.getInstance();
-        c.setTime(convertedDate);
-        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));*/
-
+        long[] dateIntervals = DateUtils.getDateIntervals(dataMonth);
         Query query = db.collection("users")
                 .document(user.getUid())
-                .collection("transactions");
+                .collection("transactions")
+                .whereGreaterThanOrEqualTo("date", dateIntervals[0])
+                .whereLessThanOrEqualTo("date", dateIntervals[1]);
 
         registration = query.addSnapshotListener(
-                new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                (queryDocumentSnapshots, e) -> {
 
-                        if (e != null) {
-                            Log.e(TAG, "Listen failed.", e);
-                            return;
-                        }
-
-                        List<Transaction> transactions = new ArrayList<>();
-                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                            transactions.add(doc.toObject(Transaction.class));
-                        }
-
-                        if (transactions.isEmpty()) {
-                            showNoData();
-                            return;
-                        }
-
-                        TransactionsAdapter transactionsAdapter = new TransactionsAdapter(getContext(), transactions);
-                        recyclerView.setAdapter(transactionsAdapter);
-                        showData();
-
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        return;
                     }
+
+                    List<Transaction> transactions = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        transactions.add(doc.toObject(Transaction.class));
+                    }
+
+                    if (transactions.isEmpty()) {
+                        showNoData();
+                        return;
+                    }
+
+                    TransactionsAdapter transactionsAdapter = new TransactionsAdapter(transactions, this::onResumeClick, this::onTransactionClick);
+                    recyclerView.setAdapter(transactionsAdapter);
+                    showData();
+
                 });
 
     }
@@ -197,7 +182,6 @@ public class TransactionListFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.w(TAG, "fragment destroyed");
         registration.remove();
     }
 
@@ -227,6 +211,16 @@ public class TransactionListFragment extends Fragment {
         noDataLayout.setVisibility(View.INVISIBLE);
         noInternetLayout.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onTransactionClick(Transaction transaction) {
+
+    }
+
+    @Override
+    public void onResumeClick(List<Transaction> transactions) {
+
     }
 
     public interface FabButtonVisibilityListener {

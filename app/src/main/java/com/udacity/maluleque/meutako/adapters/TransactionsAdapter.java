@@ -1,6 +1,5 @@
 package com.udacity.maluleque.meutako.adapters;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,28 +25,61 @@ public class TransactionsAdapter extends SectioningAdapter {
     private List<Transaction> transactions;
     private ArrayList<Section> sections;
 
-    public TransactionsAdapter(Context context, List<Transaction> transactions) {
+    private static final int VIEW_TYPE_RESUME = 0;
+    private static final int VIEW_TYPE_TRANSACTION = 1;
+    private OnResumeClickListener onResumeClickListener;
+    private OnTransactionClickListener onTransactionClickListener;
+
+    public TransactionsAdapter(List<Transaction> transactions, OnResumeClickListener onResumeClickListener, OnTransactionClickListener onTransactionClickListener) {
         this.transactions = transactions;
         this.sections = new ArrayList<>();
+        this.onResumeClickListener = onResumeClickListener;
+        this.onTransactionClickListener = onTransactionClickListener;
         preecheSeccoes();
     }
 
 
     @Override
-    public TransactionItemViewHolder onCreateItemViewHolder(ViewGroup parent, int itemType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v = inflater.inflate(R.layout.transaction_item, parent, false);
-        return new TransactionItemViewHolder(v);
+    public SectioningAdapter.ItemViewHolder onCreateItemViewHolder(ViewGroup parent, int itemType) {
+
+        int layoutId;
+
+        switch (itemType) {
+
+            case VIEW_TYPE_RESUME: {
+                layoutId = R.layout.result_history_item;
+                View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
+                return new ResumeItemViewHolder(view);
+            }
+
+            case VIEW_TYPE_TRANSACTION: {
+                layoutId = R.layout.transaction_item;
+                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                View v = inflater.inflate(layoutId, parent, false);
+                return new TransactionItemViewHolder(v);
+            }
+
+            default:
+                throw new IllegalArgumentException("Invalid view type, value of " + itemType);
+        }
+
     }
 
     @Override
-    public HeaderViewHolder onCreateHeaderViewHolder(ViewGroup parent, int headerType) {
+    public HeaderSectionViewHolder onCreateHeaderViewHolder(ViewGroup parent, int headerType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View v = inflater.inflate(R.layout.header, parent, false);
-        return new HeaderViewHolder(v);
+        return new HeaderSectionViewHolder(v);
     }
 
 
+    @Override
+    public int getSectionItemUserType(int sectionIndex, int itemIndex) {
+        if (itemIndex == 0 && sectionIndex == 0) {
+            return VIEW_TYPE_RESUME;
+        }
+        return VIEW_TYPE_TRANSACTION;
+    }
 
     private void preecheSeccoes() {
         List<String> list = new ArrayList<>(new HashSet<>(datesSectionList()));
@@ -76,22 +108,64 @@ public class TransactionsAdapter extends SectioningAdapter {
 
     @Override
     public void onBindItemViewHolder(SectioningAdapter.ItemViewHolder viewHolder, int sectionIndex, final int itemIndex, int itemType) {
-        final Transaction s = sections.get(sectionIndex).items.get(itemIndex);
-        final TransactionItemViewHolder holder = (TransactionItemViewHolder) viewHolder;
 
-        holder.textViewAmount.setText(NumberUtils.getFormattedAmount(s.getAmount()));
-        holder.textViewCategory.setText(s.getCategory());
-        holder.textViewType.setText(s.getType());
+        int viewType = getItemViewType(itemType);
 
+        switch (viewType) {
+
+            case VIEW_TYPE_RESUME: {
+                final ResumeItemViewHolder holderResume = (ResumeItemViewHolder) viewHolder;
+                double totalIncome = getTotalMonthIncome();
+                double totalExpense = getTotalMonthExpense();
+                holderResume.textViewExpense.setText(NumberUtils.getFormattedAmount(totalExpense));
+                holderResume.textViewIncome.setText(NumberUtils.getFormattedAmount(totalIncome));
+                holderResume.textViewAvailable.setText(NumberUtils.getFormattedAmount(totalIncome - totalExpense));
+
+                break;
+            }
+
+            case VIEW_TYPE_TRANSACTION: {
+                final Transaction s = sections.get(sectionIndex).items.get(itemIndex);
+                final TransactionItemViewHolder holder = (TransactionItemViewHolder) viewHolder;
+
+                holder.textViewAmount.setText(NumberUtils.getFormattedAmount(s.getAmount()));
+                holder.textViewCategory.setText(s.getCategory());
+                holder.textViewType.setText(s.getType());
+                break;
+            }
+
+            default:
+                throw new IllegalArgumentException("Invalid view type, value of " + viewType);
+        }
+
+
+    }
+
+    private double getTotalMonthExpense() {
+        double expense = 0;
+        for (Transaction transaction : transactions) {
+            if (transaction.getType().equals("Expense")) {
+                expense = expense + transaction.getAmount();
+            }
+        }
+        return expense;
+    }
+
+    private double getTotalMonthIncome() {
+        double income = 0;
+        for (Transaction transaction : transactions) {
+            if (transaction.getType().equals("Income")) {
+                income = income + transaction.getAmount();
+            }
+        }
+        return income;
     }
 
     @Override
     public void onBindHeaderViewHolder(SectioningAdapter.HeaderViewHolder viewHolder, int sectionIndex, int headerType) {
         Section s = sections.get(sectionIndex);
-        HeaderViewHolder header = (HeaderViewHolder) viewHolder;
-
+        HeaderSectionViewHolder header = (HeaderSectionViewHolder) viewHolder;
         header.textViewSection.setText(s.header);
-
     }
 
     @Override
@@ -115,7 +189,15 @@ public class TransactionsAdapter extends SectioningAdapter {
         List<Transaction> items = new ArrayList<>();
     }
 
-    public class TransactionItemViewHolder extends SectioningAdapter.ItemViewHolder {
+    public interface OnTransactionClickListener {
+        void onTransactionClick(Transaction transaction);
+    }
+
+    public interface OnResumeClickListener {
+        void onResumeClick(List<Transaction> transactions);
+    }
+
+    public class TransactionItemViewHolder extends SectioningAdapter.ItemViewHolder implements View.OnClickListener {
 
         @BindView(R.id.textViewCategory)
         TextView textViewCategory;
@@ -127,18 +209,44 @@ public class TransactionsAdapter extends SectioningAdapter {
         public TransactionItemViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
+        }
 
+        @Override
+        public void onClick(View view) {
+            int itemIndex = getAdapterPosition();
+            onTransactionClickListener.onTransactionClick(transactions.get(itemIndex));
         }
 
     }
 
+    public class ResumeItemViewHolder extends SectioningAdapter.ItemViewHolder implements View.OnClickListener {
 
-    public class HeaderViewHolder extends SectioningAdapter.HeaderViewHolder {
+        @BindView(R.id.textViewAvailableAmount)
+        TextView textViewAvailable;
+        @BindView(R.id.textViewIncome)
+        TextView textViewIncome;
+        @BindView(R.id.textViewExpense)
+        TextView textViewExpense;
+
+        public ResumeItemViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            onResumeClickListener.onResumeClick(transactions);
+        }
+    }
+
+    public class HeaderSectionViewHolder extends SectioningAdapter.HeaderViewHolder {
 
         @BindView(R.id.textViewSection)
         TextView textViewSection;
 
-        public HeaderViewHolder(View itemView) {
+        public HeaderSectionViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
