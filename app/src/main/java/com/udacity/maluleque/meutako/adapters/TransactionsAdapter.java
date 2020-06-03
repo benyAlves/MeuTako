@@ -197,6 +197,11 @@ public class TransactionsAdapter extends SectioningAdapter {
         void onResumeClick(List<Transaction> transactions);
     }
 
+    /*
+     *
+     * This ViewHolder Hold the transaction Information on click should open Transaction Details Screen
+     * */
+
     public class TransactionItemViewHolder extends SectioningAdapter.ItemViewHolder implements View.OnClickListener {
 
         @BindView(R.id.textViewCategory)
@@ -221,6 +226,12 @@ public class TransactionsAdapter extends SectioningAdapter {
         }
 
     }
+
+
+    /*
+     *
+     * This ViewHolder Holds the all calculate Information about incomes and expenses on click should open Report Activity
+     * */
 
     public class ResumeItemViewHolder extends SectioningAdapter.ItemViewHolder implements View.OnClickListener {
 

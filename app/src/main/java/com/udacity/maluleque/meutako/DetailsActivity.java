@@ -1,10 +1,12 @@
 package com.udacity.maluleque.meutako;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +15,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.udacity.maluleque.meutako.model.Transaction;
+import com.udacity.maluleque.meutako.utils.NumberUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -22,10 +28,21 @@ public class DetailsActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseUser user;
 
+    @BindView(R.id.textViewAmount)
+    TextView textViewAmount;
+    @BindView(R.id.textViewDescription)
+    TextView textViewDescription;
+    @BindView(R.id.textViewTransactionType)
+    TextView textViewType;
+    @BindView(R.id.textViewTransationCategory)
+    TextView textViewCategory;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        ButterKnife.bind(this);
+
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -33,6 +50,15 @@ public class DetailsActivity extends AppCompatActivity {
         if (extras.containsKey(TRANSACTION)) {
             transaction = getIntent().getParcelableExtra(TRANSACTION);
         }
+
+        populateData(transaction);
+    }
+
+    private void populateData(Transaction transaction) {
+        textViewAmount.setText(NumberUtils.getFormattedAmount(transaction.getAmount()));
+        textViewCategory.setText(transaction.getCategory());
+        textViewDescription.setText(transaction.getDescription());
+        textViewType.setText(transaction.getType());
     }
 
     @Override
@@ -58,7 +84,9 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void editTransaction() {
-
+        Intent intent = new Intent(this, AddTransactionActivity.class);
+        intent.putExtra(DetailsActivity.TRANSACTION, transaction);
+        startActivity(intent);
     }
 
     private void deleteTransaction() {

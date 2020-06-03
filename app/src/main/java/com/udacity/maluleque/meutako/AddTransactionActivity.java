@@ -49,6 +49,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.udacity.maluleque.meutako.DetailsActivity.TRANSACTION;
+
 public class AddTransactionActivity extends AppCompatActivity {
 
     private static final String INCOME = "Income";
@@ -94,6 +96,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     File photoFile = null;
     private Uri fileUri;
     private FirebaseUser user;
+    private Transaction transaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +108,15 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
+
+
+        Bundle extras = getIntent().getExtras();
+        if (extras.containsKey(TRANSACTION)) {
+            transaction = getIntent().getParcelableExtra(TRANSACTION);
+        }
+
+        populateData(transaction);
+
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioButtonExpense) {
@@ -129,6 +141,19 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         setDefaultDate();
 
+    }
+
+    private void populateData(Transaction transaction) {
+        transactionType = transaction.getType();
+        selectedCategory = transaction.getCategory();
+        descriptionInputText.setText(transaction.getDescription());
+        amountInputText.setText(String.valueOf(transaction.getAmount()));
+        categoryInputText.setText(transaction.getCategory());
+        if (transactionType.equals(INCOME)) {
+            radioGroup.check(R.id.radioButtonIncome);
+        } else if (transactionType.equals(EXPENSE)) {
+            radioGroup.check(R.id.radioButtonExpense);
+        }
     }
 
     private void setDefaultDate() {
