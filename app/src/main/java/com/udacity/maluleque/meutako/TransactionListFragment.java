@@ -1,6 +1,7 @@
 package com.udacity.maluleque.meutako;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -80,8 +81,6 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
         }
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d(TAG, "onCreate " + dataMonth);
-        Log.d(TAG, "onCreate " + mParam1);
     }
 
     @Override
@@ -215,12 +214,16 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
 
     @Override
     public void onTransactionClick(Transaction transaction) {
-
+        Intent intent = new Intent(getActivity(), DetailsActivity.class);
+        intent.putExtra(DetailsActivity.TRANSACTION, transaction);
+        startActivity(intent);
     }
 
     @Override
     public void onResumeClick(List<Transaction> transactions) {
-
+        Intent intent = new Intent(getActivity(), ReportActivity.class);
+        intent.putParcelableArrayListExtra("transactions", new ArrayList<>(transactions));
+        startActivity(intent);
     }
 
     public interface FabButtonVisibilityListener {

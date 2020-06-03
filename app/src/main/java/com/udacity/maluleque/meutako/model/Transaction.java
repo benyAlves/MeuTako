@@ -1,9 +1,12 @@
 package com.udacity.maluleque.meutako.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
-public class Transaction {
+public class Transaction implements Parcelable {
     private String uid;
     private String type;
     private double amount;
@@ -13,6 +16,44 @@ public class Transaction {
     private String image;
 
     public Transaction() {
+    }
+
+    public static final Creator<Transaction> CREATOR = new Creator<Transaction>() {
+        @Override
+        public Transaction createFromParcel(Parcel in) {
+            return new Transaction(in);
+        }
+
+        @Override
+        public Transaction[] newArray(int size) {
+            return new Transaction[size];
+        }
+    };
+
+    protected Transaction(Parcel in) {
+        uid = in.readString();
+        type = in.readString();
+        amount = in.readDouble();
+        category = in.readString();
+        description = in.readString();
+        date = in.readLong();
+        image = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(uid);
+        dest.writeString(type);
+        dest.writeDouble(amount);
+        dest.writeString(category);
+        dest.writeString(description);
+        dest.writeLong(date);
+        dest.writeString(image);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public String getUid() {

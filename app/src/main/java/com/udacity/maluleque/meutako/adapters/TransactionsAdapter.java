@@ -214,7 +214,9 @@ public class TransactionsAdapter extends SectioningAdapter {
 
         @Override
         public void onClick(View view) {
-            int itemIndex = getAdapterPosition();
+            int position = getAdapterPosition();
+            final int section = TransactionsAdapter.this.getSectionForAdapterPosition(position);
+            final int itemIndex = TransactionsAdapter.this.getPositionOfItemInSection(section, position);
             onTransactionClickListener.onTransactionClick(transactions.get(itemIndex));
         }
 

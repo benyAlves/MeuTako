@@ -2,7 +2,9 @@ package com.udacity.maluleque.meutako;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -36,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        toolbar.setTitle(R.string.app_name);
+        setSupportActionBar(toolbar);
 
         fab.setOnClickListener(view -> {
             Intent intent = new Intent(this, AddTransactionActivity.class);
@@ -53,19 +57,14 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        Log.i(TAG, "onTabSelected " + tab.getPosition());
-        TransactionListFragment tListFragment = (TransactionListFragment) adapter.getItem(tab.getPosition());
-        Log.i(TAG, "onTabSelected " + tListFragment.getArguments().getString("param2"));
     }
 
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {
-        Log.i(TAG, "onTabUnselected " + tab.getPosition());
     }
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
-        Log.i(TAG, "onTabReselected " + tab.getPosition());
     }
 
     @Override
@@ -76,6 +75,24 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     @Override
     public void showFabButton() {
         fab.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                //TODO settings
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }
