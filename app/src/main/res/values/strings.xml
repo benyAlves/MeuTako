@@ -27,13 +27,12 @@
     <string name="date">Date</string>
     <string name="amount">Amount</string>
     <string name="action_save">Save</string>
-    <string name="add_image">Add Image</string>
+    <string name="add_image">Add or Replace Image</string>
     <string name="transaction_image">Transaction Image</string>
     <string name="images">Images</string>
     <string name="select_category">Select category</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="no_transaction_recorded">No Transaction recorded</string>
     <string name="type_to_add">Type + to Add</string>
     <string name="no_internet_connection">No internet connection</string>
@@ -42,4 +41,31 @@
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
     <string name="transaction_details">Transaction Details</string>
+    <string name="report">Report</string>
+    <string name="latest_transactions">Latest Transactions</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Username</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="user_header">User info</string>
+    <string name="currency_title">Currency</string>
+    <string name="share_header">Share</string>
+    <string name="share_title">Share to a friend</string>
+    <string name="sharing_summary">Let your friends know about this amazing app</string>
+    <string name="username_key">username</string>
+    <string name="currency_key">currency</string>
+    <string name="share_key">share</string>
+    <string name="transaction_type">Transaction Type</string>
 </resources>

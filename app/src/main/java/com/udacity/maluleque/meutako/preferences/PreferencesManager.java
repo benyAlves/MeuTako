@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 public class PreferencesManager {
 
+    private static final String KEY_TRANSACTIONS = "transactions";
     private static PreferencesManager INSTANCE = null;
     static SharedPreferences pref;
     static SharedPreferences.Editor editor;
@@ -32,5 +33,16 @@ public class PreferencesManager {
         return pref.getBoolean(IS_FIRST_TIME_LAUNCH, true);
     }
 
+
+    public String getTransactions() {
+        return pref.getString(KEY_TRANSACTIONS, "No Transactions today. \n Remember to add");
+    }
+
+    public void setTransactions(String transactions) {
+        if (!transactions.trim().isEmpty()) {
+            editor.putString(KEY_TRANSACTIONS, transactions);
+            editor.commit();
+        }
+    }
 
 }

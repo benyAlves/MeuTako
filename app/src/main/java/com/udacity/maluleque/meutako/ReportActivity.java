@@ -2,6 +2,7 @@ package com.udacity.maluleque.meutako;
 
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
@@ -15,6 +16,7 @@ import butterknife.ButterKnife;
 
 public class ReportActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
+    private static final int TRANSACTIONS_REPORT = 1;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.tabLayout)
@@ -29,7 +31,15 @@ public class ReportActivity extends AppCompatActivity implements TabLayout.OnTab
         setContentView(R.layout.activity_report);
         ButterKnife.bind(this);
 
-        adapter = new FragmentAdapter(getSupportFragmentManager(), DateUtils.generateDates());
+        toolbar.setTitle(R.string.report);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        adapter = new FragmentAdapter(getSupportFragmentManager(), DateUtils.generateDates(), TRANSACTIONS_REPORT);
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(3);
         viewPager.setCurrentItem(10);
