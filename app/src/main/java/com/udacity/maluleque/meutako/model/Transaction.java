@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
+import com.udacity.maluleque.meutako.utils.DateUtils;
 
 @IgnoreExtraProperties
 public class Transaction implements Parcelable {
@@ -110,5 +111,9 @@ public class Transaction implements Parcelable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getFormattedDate() {
+        return DateUtils.getDataDayMonth(date);
     }
 }

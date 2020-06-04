@@ -1,0 +1,27 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/user_header">
+
+        <EditTextPreference
+            app:key="@string/username_key"
+            app:title="@string/signature_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="@string/currency_key"
+            app:title="@string/currency_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/share_header">
+
+
+        <Preference
+            app:key="@string/share_key"
+            app:summary="@string/sharing_summary"
+            app:title="@string/share_title" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

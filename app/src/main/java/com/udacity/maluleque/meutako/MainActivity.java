@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -14,14 +15,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.udacity.maluleque.meutako.adapters.FragmentAdapter;
 import com.udacity.maluleque.meutako.utils.DateUtils;
+import com.udacity.maluleque.meutako.utils.NetworkNotifier;
+import com.udacity.maluleque.meutako.utils.NetworkServiceChecker;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener, TransactionListFragment.FabButtonVisibilityListener {
+public class MainActivity extends AppCompatActivity implements TransactionListFragment.FabButtonVisibilityListener, NetworkNotifier {
 
     private static final String TAG = "MainActivity";
+    private static final int TRANSACTION_LIST = 0;
     @BindView(R.id.fab)
     FloatingActionButton fab;
     @BindView(R.id.toolbar)
@@ -46,26 +50,20 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             startActivity(intent);
         });
 
-        adapter = new FragmentAdapter(getSupportFragmentManager(), DateUtils.generateDates());
+        NetworkServiceChecker networkServiceChecker = new NetworkServiceChecker(this, this);
+        networkServiceChecker.execute();
+
+        adapter = new FragmentAdapter(getSupportFragmentManager(), DateUtils.generateDates(), TRANSACTION_LIST);
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(3);
         viewPager.setCurrentItem(10);
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         tabLayout.setupWithViewPager(viewPager);
-        tabLayout.addOnTabSelectedListener(this);
+
+
     }
 
-    @Override
-    public void onTabSelected(TabLayout.Tab tab) {
-    }
 
-    @Override
-    public void onTabUnselected(TabLayout.Tab tab) {
-    }
-
-    @Override
-    public void onTabReselected(TabLayout.Tab tab) {
-    }
 
     @Override
     public void hideFabButton() {
@@ -88,11 +86,17 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                //TODO settings
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    @Override
+    public void notifyInternetConnection(boolean hasConnection) {
+        if (!hasConnection) {
+            Toast.makeText(this, "Connect to the internet to backup data", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

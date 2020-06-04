@@ -9,9 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,22 +26,27 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.udacity.maluleque.meutako.adapters.TransactionsAdapter;
 import com.udacity.maluleque.meutako.model.Transaction;
+import com.udacity.maluleque.meutako.preferences.PreferencesManager;
 import com.udacity.maluleque.meutako.utils.DateUtils;
-
-import org.zakariya.stickyheaders.StickyHeaderLayoutManager;
+import com.udacity.maluleque.meutako.utils.NumberUtils;
+import com.udacity.maluleque.meutako.widget.TransactionViewService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.content.Context.MODE_PRIVATE;
 
-public class TransactionListFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener, TransactionsAdapter.OnResumeClickListener {
+
+public class TransactionListFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String TAG = "TransactionListFragment";
+    private static final String LAUNCH_PREF = "launch-prefs";
 
     @BindView(R.id.recyclerViewTransactions)
     RecyclerView recyclerView;
@@ -50,6 +59,18 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
 
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
+
+    @BindView(R.id.textViewAvailableAmount)
+    TextView textViewAvailable;
+    @BindView(R.id.textViewIncome)
+    TextView textViewIncome;
+    @BindView(R.id.textViewExpense)
+    TextView textViewExpense;
+
+    @BindView(R.id.resumeCardView)
+    CardView resumeCardView;
+
+
 
     private int mParam1;
     private String dataMonth;
@@ -91,7 +112,8 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
 
 
         recyclerView.setHasFixedSize(true);
-        StickyHeaderLayoutManager stickyHeaderLayoutManager = new StickyHeaderLayoutManager();
+        LinearLayoutManager stickyHeaderLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+
         recyclerView.setLayoutManager(stickyHeaderLayoutManager);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -106,14 +128,6 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
             }
         });
 
-        stickyHeaderLayoutManager.setHeaderPositionChangedCallback(new StickyHeaderLayoutManager.HeaderPositionChangedCallback() {
-            @Override
-            public void onHeaderPositionChanged(int sectionIndex, View header, StickyHeaderLayoutManager.HeaderPosition oldPosition, StickyHeaderLayoutManager.HeaderPosition newPosition) {
-                Log.i(TAG, "onHeaderPositionChanged: section: " + sectionIndex + " -> old: " + oldPosition.name() + " new: " + newPosition.name());
-                boolean elevated = newPosition == StickyHeaderLayoutManager.HeaderPosition.STICKY;
-                header.setElevation(elevated ? 8 : 0);
-            }
-        });
 
         initDataLoading(dataMonth);
 
@@ -150,7 +164,8 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
                 .document(user.getUid())
                 .collection("transactions")
                 .whereGreaterThanOrEqualTo("date", dateIntervals[0])
-                .whereLessThanOrEqualTo("date", dateIntervals[1]);
+                .whereLessThanOrEqualTo("date", dateIntervals[1])
+                .orderBy("date", Query.Direction.DESCENDING);
 
         registration = query.addSnapshotListener(
                 (queryDocumentSnapshots, e) -> {
@@ -165,17 +180,44 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
                         transactions.add(doc.toObject(Transaction.class));
                     }
 
+                    populateResumeInfo(transactions);
+                    updateWidget(transactions);
+
                     if (transactions.isEmpty()) {
                         showNoData();
                         return;
                     }
 
-                    TransactionsAdapter transactionsAdapter = new TransactionsAdapter(transactions, this::onResumeClick, this::onTransactionClick);
+                    TransactionsAdapter transactionsAdapter = new TransactionsAdapter(getContext(), transactions, this::onTransactionClick);
                     recyclerView.setAdapter(transactionsAdapter);
                     showData();
 
+
                 });
 
+    }
+
+    private void updateWidget(List<Transaction> transactions) {
+        PreferencesManager preferences = PreferencesManager.getInstance(getContext().getSharedPreferences(LAUNCH_PREF, MODE_PRIVATE));
+        preferences.setTransactions(getLastFiveTransactions(transactions));
+        TransactionViewService.startActionUpdateViewTrsansaction(getContext());
+    }
+
+    private String getLastFiveTransactions(List<Transaction> transactions) {
+        StringBuilder builder = new StringBuilder();
+        int count = 0;
+        for (Transaction transaction : transactions) {
+            if (count < 5) {
+                if (DateUtils.getDataDayMonth(transaction.getDate()).equals(DateUtils.getDataDayMonth(new Date().getTime()))) {
+                    builder.append("\n")
+                            .append(transaction.getCategory())
+                            .append(" ")
+                            .append(transaction.getType().equals("Income") ? " +" + NumberUtils.getFormattedAmount(transaction.getAmount()) : " -" + NumberUtils.getFormattedAmount(transaction.getAmount()));
+                }
+            }
+            count++;
+        }
+        return builder.toString();
     }
 
     @Override
@@ -219,11 +261,44 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
         startActivity(intent);
     }
 
-    @Override
-    public void onResumeClick(List<Transaction> transactions) {
+
+    public void openReportActivity(List<Transaction> transactions) {
         Intent intent = new Intent(getActivity(), ReportActivity.class);
         intent.putParcelableArrayListExtra("transactions", new ArrayList<>(transactions));
         startActivity(intent);
+    }
+
+    private void populateResumeInfo(List<Transaction> transactions) {
+        double totalIncome = getTotalMonthIncome(transactions);
+        double totalExpense = getTotalMonthExpense(transactions);
+
+        textViewExpense.setText(String.format("-%s", NumberUtils.getFormattedAmount(totalExpense)));
+        textViewExpense.setTextColor(ContextCompat.getColor(getContext(), R.color.colorExpense));
+        textViewIncome.setText(String.format("+%s", NumberUtils.getFormattedAmount(totalIncome)));
+        textViewIncome.setTextColor(ContextCompat.getColor(getContext(), R.color.colorIncome));
+        textViewAvailable.setText(NumberUtils.getFormattedAmount(totalIncome - totalExpense));
+
+        resumeCardView.setOnClickListener(view -> openReportActivity(transactions));
+    }
+
+    private double getTotalMonthExpense(List<Transaction> transactions) {
+        double expense = 0;
+        for (Transaction transaction : transactions) {
+            if (transaction.getType().equals("Expense")) {
+                expense = expense + transaction.getAmount();
+            }
+        }
+        return expense;
+    }
+
+    private double getTotalMonthIncome(List<Transaction> transactions) {
+        double income = 0;
+        for (Transaction transaction : transactions) {
+            if (transaction.getType().equals("Income")) {
+                income = income + transaction.getAmount();
+            }
+        }
+        return income;
     }
 
     public interface FabButtonVisibilityListener {

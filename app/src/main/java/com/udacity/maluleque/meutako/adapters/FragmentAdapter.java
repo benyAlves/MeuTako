@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.udacity.maluleque.meutako.ReportFragment;
 import com.udacity.maluleque.meutako.TransactionListFragment;
 import com.udacity.maluleque.meutako.utils.DateUtils;
 
@@ -13,15 +14,20 @@ import java.util.List;
 public class FragmentAdapter extends FragmentStatePagerAdapter {
 
     private final List<String> months;
+    private final int type;
 
-    public FragmentAdapter(FragmentManager fm, List<String> months) {
+    public FragmentAdapter(FragmentManager fm, List<String> months, int type) {
         super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         this.months = months;
+        this.type = type;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return TransactionListFragment.newInstance(position, months.get(position));
+        if (type == 0) {
+            return TransactionListFragment.newInstance(position, months.get(position));
+        }
+        return ReportFragment.newInstance(position, months.get(position));
     }
 
     @Override

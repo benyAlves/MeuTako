@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -24,6 +26,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,18 +36,18 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 import com.udacity.maluleque.meutako.model.Category;
 import com.udacity.maluleque.meutako.model.Transaction;
 import com.udacity.maluleque.meutako.utils.DateUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -97,6 +101,22 @@ public class AddTransactionActivity extends AppCompatActivity {
     private Uri fileUri;
     private FirebaseUser user;
     private Transaction transaction;
+    private Uri file;
+
+    private static File getOutputMediaFile() {
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "Transaction Info");
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                return null;
+            }
+        }
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        return new File(mediaStorageDir.getPath() + File.separator +
+                "IMG_" + timeStamp + ".jpg");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,16 +126,24 @@ public class AddTransactionActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
 
 
         Bundle extras = getIntent().getExtras();
-        if (extras.containsKey(TRANSACTION)) {
-            transaction = getIntent().getParcelableExtra(TRANSACTION);
+        if (extras != null) {
+            if (extras.containsKey(TRANSACTION)) {
+                transaction = getIntent().getParcelableExtra(TRANSACTION);
+                populateData(transaction);
+            }
         }
 
-        populateData(transaction);
 
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -124,6 +152,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             } else if (checkedId == R.id.radioButtonIncome) {
                 transactionType = INCOME;
             }
+            categoryInputText.getText().clear();
         });
 
 
@@ -141,19 +170,6 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         setDefaultDate();
 
-    }
-
-    private void populateData(Transaction transaction) {
-        transactionType = transaction.getType();
-        selectedCategory = transaction.getCategory();
-        descriptionInputText.setText(transaction.getDescription());
-        amountInputText.setText(String.valueOf(transaction.getAmount()));
-        categoryInputText.setText(transaction.getCategory());
-        if (transactionType.equals(INCOME)) {
-            radioGroup.check(R.id.radioButtonIncome);
-        } else if (transactionType.equals(EXPENSE)) {
-            radioGroup.check(R.id.radioButtonExpense);
-        }
     }
 
     private void setDefaultDate() {
@@ -221,33 +237,6 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            fileUri = Uri.fromFile(photoFile);
-            Picasso.get().load(fileUri).into(imageView);
-        }
-    }
-
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -260,37 +249,76 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
     }
 
+    private void populateData(Transaction transaction) {
+        transactionType = transaction.getType();
+        selectedCategory = transaction.getCategory();
+        descriptionInputText.setText(transaction.getDescription());
+        amountInputText.setText(String.valueOf(transaction.getAmount()));
+        categoryInputText.setText(transaction.getCategory());
+        if (transactionType.equals(INCOME)) {
+            radioGroup.check(R.id.radioButtonIncome);
+        } else if (transactionType.equals(EXPENSE)) {
+            radioGroup.check(R.id.radioButtonExpense);
+        }
+        if (transaction.getImage() != null) {
+            if (!transaction.getImage().trim().isEmpty()) {
+                storage.getReference().child(transaction.getImage()).getDownloadUrl().addOnSuccessListener(uri -> {
+                    Picasso.get()
+                            .load(uri)
+                            .centerCrop()
+                            .resize(500, 500)
+                            .into(imageView);
+                }).addOnFailureListener(exception -> {
+                    Log.e(TAG, "Error downloading", exception);
+                });
+            }
+
+        }
+    }
+
     private void saveTransaction() {
-        /*storage = FirebaseStorage.getInstance();
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        StorageReference imagesRef = storage.getReference().child("images/"+timeStamp+".jpg");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        if (imageBitmap != null) {
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-            UploadTask uploadTask = imagesRef.putBytes(data);
+
+        StorageReference storageReference = null;
+        if (file != null) {
+            storageReference = storage.getReference().child("images").child(user.getUid() + "/" + file.getLastPathSegment());
+            UploadTask uploadTask = storageReference.putFile(file);
+            Log.d(TAG, "Path: " + storageReference.getPath());
+
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
-                    Log.e(TAG, "Uploading Image: ", exception);
+                    Log.e(TAG, "Error uploading", exception);
+                    Toast.makeText(AddTransactionActivity.this, "Image not uploaded, try again", Toast.LENGTH_SHORT).show();
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Log.e(TAG, "Uploaded Image: " + taskSnapshot.getMetadata().getReference());
+                    Log.d(TAG, "Uploaded " + taskSnapshot.getMetadata().getPath());
                 }
             });
-        }*/
-
+        }
         if (isValidInput()) {
-            DocumentReference document = db.collection("users").document(user.getUid()).collection("transactions").document();
-            Transaction transaction = new Transaction();
+            DocumentReference document;
+
+            if (transaction == null) {
+                document = db.collection("users").document(user.getUid()).collection("transactions").document();
+                transaction = new Transaction();
+            } else {
+                document = db.collection("users").document(user.getUid()).collection("transactions").document(transaction.getUid());
+            }
+
             transaction.setUid(document.getId());
             transaction.setType(transactionType);
-            transaction.setAmount(Double.valueOf(amountInputText.getText().toString()));
+            transaction.setAmount(Double.parseDouble(amountInputText.getText().toString()));
             transaction.setCategory(selectedCategory);
             transaction.setDate(date.getTime());
             transaction.setDescription(descriptionInputText.getText().toString());
+
+            if (storageReference != null) {
+                if (storageReference.getPath() != null) {
+                    transaction.setImage(storageReference.getPath());
+                }
+            }
 
             document.set(transaction)
                     .addOnSuccessListener(aVoid -> {
@@ -304,33 +332,17 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     }
 
-
     private void captureImage() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         } else {
-            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                try {
-                    File photoFile = createImageFile();
-                    Log.i(TAG, photoFile.getAbsolutePath());
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            file = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getOutputMediaFile());
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, file);
 
-                    if (photoFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile(this,
-                                "com.udacity.maluleque.meutako.fileprovider",
-                                photoFile);
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                    }
-                } catch (Exception ex) {
-                    Log.e(TAG, "Error getting Image: " + ex);
-                }
-
-
-            } else {
-                Log.e(TAG, "Error resolving intent");
-            }
+            startActivityForResult(intent, 100);
         }
 
 
@@ -346,6 +358,22 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100) {
+            if (resultCode == RESULT_OK) {
+                Picasso.get()
+                        .load(file)
+                        .centerCrop()
+                        .resize(500, 500)
+                        .into(imageView);
+            }
+        }
+    }
+
+
 
     private boolean isValidInput() {
 

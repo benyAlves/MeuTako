@@ -53,7 +53,7 @@
             android:layout_weight="1"
             app:cardElevation="1dp">
 
-            <com.github.mikephil.charting.charts.BarChart
+            <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/lineChart"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />

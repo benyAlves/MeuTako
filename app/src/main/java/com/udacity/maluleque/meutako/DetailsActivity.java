@@ -6,14 +6,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.squareup.picasso.Picasso;
 import com.udacity.maluleque.meutako.model.Transaction;
 import com.udacity.maluleque.meutako.utils.NumberUtils;
 
@@ -36,6 +42,11 @@ public class DetailsActivity extends AppCompatActivity {
     TextView textViewType;
     @BindView(R.id.textViewTransationCategory)
     TextView textViewCategory;
+    @BindView(R.id.imageView)
+    ImageView imageView;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+    private FirebaseStorage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +54,14 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
         ButterKnife.bind(this);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
+        storage = FirebaseStorage.getInstance();
 
         Bundle extras = getIntent().getExtras();
         if (extras.containsKey(TRANSACTION)) {
@@ -59,6 +76,24 @@ public class DetailsActivity extends AppCompatActivity {
         textViewCategory.setText(transaction.getCategory());
         textViewDescription.setText(transaction.getDescription());
         textViewType.setText(transaction.getType());
+
+        if (transaction.getImage() != null) {
+            if (!transaction.getImage().trim().isEmpty()) {
+                progressBar.setVisibility(View.VISIBLE);
+                storage.getReference().child(transaction.getImage()).getDownloadUrl().addOnSuccessListener(uri -> {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Picasso.get()
+                            .load(uri)
+                            .centerCrop()
+                            .resize(500, 500)
+                            .into(imageView);
+                }).addOnFailureListener(exception -> {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Log.e(TAG, "Error downloading", exception);
+                });
+            }
+
+        }
     }
 
     @Override
