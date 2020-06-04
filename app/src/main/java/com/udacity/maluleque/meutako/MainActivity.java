@@ -13,6 +13,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.database.FirebaseDatabase;
 import com.udacity.maluleque.meutako.adapters.FragmentAdapter;
 import com.udacity.maluleque.meutako.utils.DateUtils;
 import com.udacity.maluleque.meutako.utils.NetworkNotifier;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements TransactionListFr
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         tabLayout.setupWithViewPager(viewPager);
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
     }
 
