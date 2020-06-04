@@ -6,6 +6,11 @@
     <color name="colorSecondaryText">#757575</color>
     <color name="colorPrimaryText">#212121</color>
 
+
+    <color name="colorIncome">#388E3C</color>
+    <color name="colorExpense">#D32F2F</color>
+
+
     <!-- dots inactive colors -->
     <color name="dot_inactive">#fff</color>
 
