@@ -18,8 +18,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -135,11 +137,7 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
     }
 
     private void initDataLoading(String dataMonth) {
-        // if(NetworkUtils.hasInternetConnection(getContext())) {
         getTransactions(dataMonth);
-        /*}else {
-            showNoInternet();
-        }*/
     }
 
     @OnClick(R.id.btnTryAgain)
@@ -199,8 +197,18 @@ public class TransactionListFragment extends Fragment implements TransactionsAda
 
     private void updateWidget(List<Transaction> transactions) {
         PreferencesManager preferences = PreferencesManager.getInstance(getContext().getSharedPreferences(LAUNCH_PREF, MODE_PRIVATE));
-        preferences.setTransactions(getLastFiveTransactions(transactions));
-        TransactionViewService.startActionUpdateViewTrsansaction(getContext());
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        Task<Void> task = database.getReference("widget").child(user.getUid()).child("transactions").setValue(getLastFiveTransactions(transactions));
+
+        task.addOnSuccessListener(aVoid -> TransactionViewService.startActionUpdateViewTrsansaction(getContext())).addOnFailureListener(e -> {
+            Log.e(TAG, "Saving failed.", e);
+            preferences.setTransactions(getLastFiveTransactions(transactions));
+            TransactionViewService.startActionUpdateViewTrsansaction(getContext());
+        });
+
+
+
     }
 
     private String getLastFiveTransactions(List<Transaction> transactions) {

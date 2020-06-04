@@ -68,4 +68,6 @@
     <string name="currency_key">currency</string>
     <string name="share_key">share</string>
     <string name="transaction_type">Transaction Type</string>
+    <string name="available">Available</string>
+    <string name="incomes">Incomes</string>
 </resources>

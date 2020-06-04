@@ -267,6 +267,8 @@ public class AddTransactionActivity extends AppCompatActivity {
                             .load(uri)
                             .centerCrop()
                             .resize(500, 500)
+                            .error(R.drawable.no_image)
+                            .placeholder(R.drawable.placeholder)
                             .into(imageView);
                 }).addOnFailureListener(exception -> {
                     Log.e(TAG, "Error downloading", exception);
@@ -336,13 +338,15 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-        } else {
+        } else if (getOutputMediaFile() != null) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             file = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getOutputMediaFile());
             intent.putExtra(MediaStore.EXTRA_OUTPUT, file);
 
             startActivityForResult(intent, 100);
+        } else {
+            Toast.makeText(this, "Ups, Could not open camera now", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -367,6 +371,8 @@ public class AddTransactionActivity extends AppCompatActivity {
                 Picasso.get()
                         .load(file)
                         .centerCrop()
+                        .error(R.drawable.no_image)
+                        .placeholder(R.drawable.placeholder)
                         .resize(500, 500)
                         .into(imageView);
             }

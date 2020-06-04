@@ -85,6 +85,8 @@ public class DetailsActivity extends AppCompatActivity {
                     Picasso.get()
                             .load(uri)
                             .centerCrop()
+                            .error(R.drawable.no_image)
+                            .placeholder(R.drawable.placeholder)
                             .resize(500, 500)
                             .into(imageView);
                 }).addOnFailureListener(exception -> {
