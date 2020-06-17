@@ -13,6 +13,7 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.auth.FirebaseAuth
 import com.udacity.maluleque.meutako.TransactionListFragment.FabButtonVisibilityListener
 import com.udacity.maluleque.meutako.adapters.FragmentAdapter
 import com.udacity.maluleque.meutako.utils.DateUtils
@@ -74,6 +75,12 @@ class MainActivity : AppCompatActivity(), FabButtonVisibilityListener, NetworkNo
         return when (item.itemId) {
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.action_logout -> {
+                FirebaseAuth.getInstance().signOut()
+                startActivity(Intent(this, SignInActivity::class.java))
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)

@@ -70,4 +70,5 @@
     <string name="transaction_type">Transaction Type</string>
     <string name="available">Available</string>
     <string name="incomes">Incomes</string>
+    <string name="action_logout">Logout</string>
 </resources>
