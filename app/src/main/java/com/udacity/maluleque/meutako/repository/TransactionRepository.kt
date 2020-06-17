@@ -1,17 +1,25 @@
 package com.udacity.maluleque.meutako.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
-import com.google.firebase.firestore.*
+import androidx.lifecycle.MutableLiveData
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.udacity.maluleque.meutako.model.Transaction
+import com.udacity.maluleque.meutako.utils.Resource
+import java.util.*
 
-class TransactionRepository(val db: FirebaseFirestore, val userUid: String, val initialDate: Long, val endDate: Long) {
+class TransactionRepository() {
 
     private val TAG: String? = "TransactionRepository"
-    private lateinit var registration: ListenerRegistration
-    var transactions: LiveData<MutableList<Transaction>> = TODO()
 
-    fun getTransactions(dataMonth: String?) {
+
+    fun getTransactions(db: FirebaseFirestore, userUid: String, initialDate: Long, endDate: Long): LiveData<Resource<List<Transaction>>> {
+
+        var transactionsLiveData = MutableLiveData<Resource<List<Transaction>>>()
+        val transactions: MutableList<Transaction> = ArrayList()
+
         val query = db.collection("users")
                 .document(userUid)
                 .collection("transactions")
@@ -19,17 +27,19 @@ class TransactionRepository(val db: FirebaseFirestore, val userUid: String, val 
                 .whereLessThanOrEqualTo("date", endDate)
                 .orderBy("date", Query.Direction.DESCENDING)
 
-        registration = query.addSnapshotListener { queryDocumentSnapshots: QuerySnapshot?, e: FirebaseFirestoreException? ->
+        query.addSnapshotListener { queryDocumentSnapshots: QuerySnapshot?, e: FirebaseFirestoreException? ->
+
             if (e != null) {
-                Log.e(TAG, "Listen failed.", e)
-                return@addSnapshotListener
+                transactionsLiveData.value = Resource.error(e.message, transactions)
             }
 
             for (doc in queryDocumentSnapshots!!) {
-                //transactions.value = doc.toObject(Transaction::class.java)
+                transactions.add(doc.toObject(Transaction::class.java))
             }
-            return@addSnapshotListener
+            transactionsLiveData.value = Resource.success(transactions)
         }
+
+        return transactionsLiveData
     }
 
 }
