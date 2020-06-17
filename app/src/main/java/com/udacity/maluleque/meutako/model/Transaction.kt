@@ -17,6 +17,7 @@ class Transaction : Parcelable {
 
     constructor() {}
 
+/*
     protected constructor(`in`: Parcel) {
         uid = `in`.readString()
         type = `in`.readString()
@@ -36,6 +37,7 @@ class Transaction : Parcelable {
         dest.writeLong(date)
         dest.writeString(image)
     }
+*/
 
     override fun describeContents(): Int {
         return 0
@@ -44,15 +46,44 @@ class Transaction : Parcelable {
     val formattedDate: String
         get() = getDataDayMonth(date)
 
-    companion object {
-        val CREATOR: Parcelable.Creator<Transaction?> = object : Parcelable.Creator<Transaction?> {
-            override fun createFromParcel(`in`: Parcel): Transaction? {
-                return Transaction(`in`)
-            }
+    constructor(parcel: Parcel) : this() {
+        uid = parcel.readString()
+        type = parcel.readString()
+        amount = parcel.readDouble()
+        category = parcel.readString()
+        description = parcel.readString()
+        date = parcel.readLong()
+        image = parcel.readString()
+    }
 
-            override fun newArray(size: Int): Array<Transaction?> {
-                return arrayOfNulls(size)
-            }
+    /* companion object {
+         val CREATOR: Parcelable.Creator<Transaction?> = object : Parcelable.Creator<Transaction?> {
+             override fun createFromParcel(`in`: Parcel): Transaction? {
+                 return Transaction(`in`)
+             }
+
+             override fun newArray(size: Int): Array<Transaction?> {
+                 return arrayOfNulls(size)
+             }
+         }
+     }*/
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(uid)
+        parcel.writeString(type)
+        parcel.writeDouble(amount)
+        parcel.writeString(category)
+        parcel.writeString(description)
+        parcel.writeLong(date)
+        parcel.writeString(image)
+    }
+
+    companion object CREATOR : Parcelable.Creator<Transaction> {
+        override fun createFromParcel(parcel: Parcel): Transaction {
+            return Transaction(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Transaction?> {
+            return arrayOfNulls(size)
         }
     }
 }

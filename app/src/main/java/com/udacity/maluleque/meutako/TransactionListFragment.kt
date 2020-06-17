@@ -77,10 +77,10 @@ class TransactionListFragment : Fragment(), OnTransactionClickListener {
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_transaction_list, container, false)
         ButterKnife.bind(this, view)
-        recyclerView!!.setHasFixedSize(true)
+        recyclerView.setHasFixedSize(true)
         val stickyHeaderLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        recyclerView!!.layoutManager = stickyHeaderLayoutManager
-        recyclerView!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        recyclerView.layoutManager = stickyHeaderLayoutManager
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy > 0) {

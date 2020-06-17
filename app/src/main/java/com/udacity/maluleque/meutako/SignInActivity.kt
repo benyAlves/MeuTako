@@ -7,22 +7,29 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.AuthUI.IdpConfig
 import com.firebase.ui.auth.AuthUI.IdpConfig.GoogleBuilder
 import com.firebase.ui.auth.IdpResponse
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
 import com.udacity.maluleque.meutako.model.User
+import com.udacity.maluleque.meutako.utils.Status
+import com.udacity.maluleque.meutako.viewmodel.AuthViewModel
 import java.util.*
 
 class SignInActivity : AppCompatActivity() {
+
     var providers: List<IdpConfig>? = null
+    lateinit var authViewModel: AuthViewModel
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
+
+        authViewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
+
         providers = Arrays.asList(GoogleBuilder().build())
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
@@ -36,9 +43,22 @@ class SignInActivity : AppCompatActivity() {
         if (requestCode == RC_SIGN_IN) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == Activity.RESULT_OK) {
-                val user = FirebaseAuth.getInstance().currentUser
-                Log.d(TAG, user!!.displayName)
-                saveUserInDatabase(user)
+                val authenticatedUser = FirebaseAuth.getInstance().currentUser
+                val user = User(authenticatedUser!!.uid, authenticatedUser.displayName, authenticatedUser.phoneNumber)
+                authViewModel.saveUser(user).observe(this, androidx.lifecycle.Observer {
+                    when (it.status) {
+                        Status.SUCCESS -> {
+                            startActivity(Intent(this@SignInActivity, MainActivity::class.java))
+                            finish()
+                        }
+                        Status.LOADING -> {
+                            Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show()
+                        }
+                        Status.ERROR -> {
+                            Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
             } else {
                 Toast.makeText(this, R.string.sign_in_failed_text, Toast.LENGTH_SHORT).show()
                 Log.e(TAG, String.format("%s with code %d", getString(R.string.sign_in_failed_text), resultCode))
@@ -49,21 +69,6 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveUserInDatabase(firebaseUser: FirebaseUser?) {
-        val db = FirebaseFirestore.getInstance()
-        val user = User(firebaseUser!!.uid, firebaseUser.displayName, firebaseUser.phoneNumber)
-        db.collection("users")
-                .document(firebaseUser.uid)
-                .set(user).addOnCompleteListener { task: Task<Void?> ->
-                    if (task.isSuccessful) {
-                        startActivity(Intent(this@SignInActivity, MainActivity::class.java))
-                        finish()
-                    } else {
-                        Toast.makeText(this@SignInActivity, getText(R.string.error_adding_data), Toast.LENGTH_SHORT).show()
-                        Log.w(TAG, getString(R.string.error_adding_data), task.exception)
-                    }
-                }
-    }
 
     fun signInUser(view: View?) {
         Log.d(TAG, "Clicked")
