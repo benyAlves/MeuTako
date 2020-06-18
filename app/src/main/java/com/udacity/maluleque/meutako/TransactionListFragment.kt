@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
@@ -21,13 +22,15 @@ import butterknife.OnClick
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.Query
 import com.udacity.maluleque.meutako.adapters.TransactionsAdapter
 import com.udacity.maluleque.meutako.adapters.TransactionsAdapter.OnTransactionClickListener
 import com.udacity.maluleque.meutako.model.Transaction
 import com.udacity.maluleque.meutako.preferences.PreferencesManager
 import com.udacity.maluleque.meutako.utils.DateUtils
 import com.udacity.maluleque.meutako.utils.NumberUtils
+import com.udacity.maluleque.meutako.utils.Status
+import com.udacity.maluleque.meutako.viewmodel.TransactionViewModel
 import com.udacity.maluleque.meutako.widget.TransactionViewService
 import java.util.*
 
@@ -59,18 +62,20 @@ class TransactionListFragment : Fragment(), OnTransactionClickListener {
 
     private var mParam1 = 0
     private var dataMonth: String? = null
-    private var db: FirebaseFirestore? = null
-    private var registration: ListenerRegistration? = null
     private var user: FirebaseUser? = null
     private var fabButtonVisibilityListener: FabButtonVisibilityListener? = null
+    private lateinit var transactionViewModel: TransactionViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
             mParam1 = requireArguments().getInt(ARG_PARAM1)
             dataMonth = requireArguments().getString(ARG_PARAM2)
         }
-        db = FirebaseFirestore.getInstance()
         user = FirebaseAuth.getInstance().currentUser
+
+        transactionViewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -115,31 +120,50 @@ class TransactionListFragment : Fragment(), OnTransactionClickListener {
     fun getTransactions(dataMonth: String?) {
         showProgressBar()
         val dateIntervals = DateUtils.getDateIntervals(dataMonth)
-        val query = db!!.collection("users")
-                .document(user!!.uid)
-                .collection("transactions")
-                .whereGreaterThanOrEqualTo("date", dateIntervals[0])
-                .whereLessThanOrEqualTo("date", dateIntervals[1])
-                .orderBy("date", Query.Direction.DESCENDING)
-        registration = query.addSnapshotListener { queryDocumentSnapshots: QuerySnapshot?, e: FirebaseFirestoreException? ->
-            if (e != null) {
-                Log.e(TAG, "Listen failed.", e)
-                return@addSnapshotListener
-            }
-            val transactions: MutableList<Transaction> = ArrayList()
-            for (doc in queryDocumentSnapshots!!) {
-                transactions.add(doc.toObject(Transaction::class.java))
-            }
-            populateResumeInfo(transactions)
-            updateWidget(transactions)
-            if (transactions.isEmpty()) {
-                showNoData()
-                return@addSnapshotListener
-            }
-            val transactionsAdapter = TransactionsAdapter(requireContext(), transactions, this)
-            recyclerView!!.adapter = transactionsAdapter
-            showData()
-        }
+
+        transactionViewModel.getTransactions(user!!.uid, dateIntervals[0], dateIntervals[1], Query.Direction.DESCENDING)
+                .observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+                    when (it.status) {
+                        Status.LOADING -> {
+                            showProgressBar()
+                        }
+                        Status.SUCCESS -> {
+                            val transactions = it.data
+                            if (transactions.isNotEmpty()) {
+                                populateResumeInfo(transactions)
+                                updateWidget(transactions)
+                                val transactionsAdapter = TransactionsAdapter(requireContext(), transactions, this)
+                                recyclerView!!.adapter = transactionsAdapter
+                                showData()
+                            } else {
+                                showNoData()
+                            }
+                        }
+                        Status.ERROR -> {
+                            showNoData()
+                        }
+                    }
+                })
+
+        /* registration = query.addSnapshotListener { queryDocumentSnapshots: QuerySnapshot?, e: FirebaseFirestoreException? ->
+             if (e != null) {
+                 Log.e(TAG, "Listen failed.", e)
+                 return@addSnapshotListener
+             }
+             val transactions: MutableList<Transaction> = ArrayList()
+             for (doc in queryDocumentSnapshots!!) {
+                 transactions.add(doc.toObject(Transaction::class.java))
+             }
+             populateResumeInfo(transactions)
+             updateWidget(transactions)
+             if (transactions.isEmpty()) {
+                 showNoData()
+                 return@addSnapshotListener
+             }
+             val transactionsAdapter = TransactionsAdapter(requireContext(), transactions, this)
+             recyclerView!!.adapter = transactionsAdapter
+             showData()
+         }*/
     }
 
     private fun updateWidget(transactions: List<Transaction>) {
@@ -168,11 +192,6 @@ class TransactionListFragment : Fragment(), OnTransactionClickListener {
             count++
         }
         return builder.toString()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        registration!!.remove()
     }
 
     fun showProgressBar() {

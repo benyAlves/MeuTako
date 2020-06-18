@@ -7,25 +7,27 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.udacity.maluleque.meutako.model.Transaction
+import com.udacity.maluleque.meutako.utils.Constants
 import com.udacity.maluleque.meutako.utils.Resource
 import java.util.*
 
 class TransactionRepository() {
 
     private val TAG: String? = "TransactionRepository"
+    private val db = FirebaseFirestore.getInstance()
 
 
-    fun getTransactions(db: FirebaseFirestore, userUid: String, initialDate: Long, endDate: Long): LiveData<Resource<List<Transaction>>> {
+    fun getUserTransactionsByDatesAndOrder(userUid: String, initialDate: Long, endDate: Long, orderDirection: Query.Direction): LiveData<Resource<List<Transaction>>> {
 
         var transactionsLiveData = MutableLiveData<Resource<List<Transaction>>>()
         val transactions: MutableList<Transaction> = ArrayList()
 
-        val query = db.collection("users")
+        val query = db.collection(Constants.USERS)
                 .document(userUid)
-                .collection("transactions")
+                .collection(Constants.TRANSACTIONS)
                 .whereGreaterThanOrEqualTo("date", initialDate)
                 .whereLessThanOrEqualTo("date", endDate)
-                .orderBy("date", Query.Direction.DESCENDING)
+                .orderBy("date", orderDirection)
 
         query.addSnapshotListener { queryDocumentSnapshots: QuerySnapshot?, e: FirebaseFirestoreException? ->
 
@@ -33,9 +35,13 @@ class TransactionRepository() {
                 transactionsLiveData.value = Resource.error(e.message, transactions)
             }
 
-            for (doc in queryDocumentSnapshots!!) {
-                transactions.add(doc.toObject(Transaction::class.java))
+            if (queryDocumentSnapshots != null) {
+
+                for (doc in queryDocumentSnapshots) {
+                    transactions.add(doc.toObject(Transaction::class.java))
+                }
             }
+
             transactionsLiveData.value = Resource.success(transactions)
         }
 
