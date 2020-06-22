@@ -44,6 +44,7 @@ import com.udacity.maluleque.meutako.model.Category
 import com.udacity.maluleque.meutako.model.Transaction
 import com.udacity.maluleque.meutako.utils.DateUtils
 import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -97,8 +98,8 @@ class AddTransactionActivity : AppCompatActivity() {
     private val permissions: ArrayList<*> = ArrayList<Any?>()
     private var storage: FirebaseStorage? = null
     private val imageBitmap: Bitmap? = null
-    private val currentPhotoPath: String? = null
-    var photoFile: File? = null
+    private lateinit var currentPhotoPath: String
+    lateinit var photoFile: File
     private val fileUri: Uri? = null
     private var user: FirebaseUser? = null
     private var transaction: Transaction? = null
@@ -277,36 +278,40 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun captureImage() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
-        } else if (outputMediaFile != null) {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        } else{
+            /*val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             file = FileProvider.getUriForFile(this, applicationContext.packageName + ".provider", outputMediaFile!!)
             intent.putExtra(MediaStore.EXTRA_OUTPUT, file)
-            startActivityForResult(intent, 100)
-        } else {
-            Toast.makeText(this, "Ups, Could not open camera now", Toast.LENGTH_SHORT).show()
+            startActivityForResult(intent, 100)*/
+            dispatchTakePictureIntent()
         }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == 0) {
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                captureImage()
+                dispatchTakePictureIntent()
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 100) {
+        if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                Picasso.get()
-                        .load(file)
-                        .centerCrop()
-                        .error(R.drawable.no_image)
-                        .placeholder(R.drawable.placeholder)
-                        .resize(500, 500)
-                        .into(imageView)
+                val extras = data?.extras
+                Log.d(TAG, "Error creating file " + extras)
+                if(extras != null) {
+                    val uri = extras.getParcelable<Uri>(MediaStore.EXTRA_OUTPUT)
+                    Picasso.get()
+                            .load(uri)
+                            .centerCrop()
+                            .error(R.drawable.no_image)
+                            .placeholder(R.drawable.placeholder)
+                            .resize(500, 500)
+                            .into(imageView)
+                }
             }
         }
     }
@@ -333,6 +338,56 @@ class AddTransactionActivity : AppCompatActivity() {
             }
             return true
         }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+                "JPEG_${timeStamp}_", /* prefix */
+                ".jpg", /* suffix */
+                storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
+    val REQUEST_TAKE_PHOTO = 1
+
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(packageManager)?.also {
+
+                // Create the File where the photo should go
+                 try {
+                     photoFile = createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    Log.e(TAG, "Error creating file", ex)
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                            this,
+                            "com.udacity.maluleque.meutako.fileprovider",
+                            it
+                    )
+                    Log.d(TAG, "Image URI: "+photoURI)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+                }
+            }
+        }
+    }
+
+
 
     companion object {
         private const val INCOME = "Income"
