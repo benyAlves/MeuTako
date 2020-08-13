@@ -10,11 +10,9 @@ import com.udacity.maluleque.meutako.model.Transaction
 import com.udacity.maluleque.meutako.utils.Constants
 import com.udacity.maluleque.meutako.utils.Resource
 import java.util.*
+import javax.inject.Inject
 
-class TransactionRepository() {
-
-    private val TAG: String? = "TransactionRepository"
-    private val db = FirebaseFirestore.getInstance()
+class TransactionRepository @Inject constructor(private val db: FirebaseFirestore) {
 
 
     fun getUserTransactionsByDatesAndOrder(userUid: String, initialDate: Long, endDate: Long, orderDirection: Query.Direction): LiveData<Resource<List<Transaction>>> {
@@ -46,6 +44,10 @@ class TransactionRepository() {
         }
 
         return transactionsLiveData
+    }
+
+    companion object {
+        private const val TAG: String = "TransactionRepository"
     }
 
 }

@@ -33,6 +33,7 @@ import com.udacity.maluleque.meutako.utils.Status
 import com.udacity.maluleque.meutako.viewmodel.TransactionViewModel
 import com.udacity.maluleque.meutako.widget.TransactionViewService
 import java.util.*
+import javax.inject.Inject
 
 class TransactionListFragment : Fragment(), OnTransactionClickListener {
 
@@ -66,6 +67,9 @@ class TransactionListFragment : Fragment(), OnTransactionClickListener {
     private var fabButtonVisibilityListener: FabButtonVisibilityListener? = null
     private lateinit var transactionViewModel: TransactionViewModel
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
@@ -74,7 +78,9 @@ class TransactionListFragment : Fragment(), OnTransactionClickListener {
         }
         user = FirebaseAuth.getInstance().currentUser
 
-        transactionViewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
+        (activity?.application as App).appComponent.inject(this)
+
+        transactionViewModel = ViewModelProvider(this, viewModelFactory).get(TransactionViewModel::class.java)
 
     }
 

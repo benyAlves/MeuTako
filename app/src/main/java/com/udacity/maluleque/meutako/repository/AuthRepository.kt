@@ -13,9 +13,9 @@ import javax.inject.Inject
 @Inject tells dagger how to create AuthRepository
 and now dagger knows that AuthRepository has FirebaseFirestore dependency
 * */
-class AuthRepository @Inject constructor(val rootRef: FirebaseFirestore) {
+class AuthRepository @Inject constructor(db: FirebaseFirestore) {
 
-    private val usersRef = rootRef.collection("users")
+    private val usersRef = db.collection("users")
 
     fun saveAuthenticatedUser(authenticatedUser: User): MutableLiveData<Resource<User>> {
 

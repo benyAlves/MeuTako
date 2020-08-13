@@ -1,17 +1,15 @@
 package com.udacity.maluleque.meutako.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.Query
 import com.udacity.maluleque.meutako.model.Transaction
 import com.udacity.maluleque.meutako.repository.TransactionRepository
 import com.udacity.maluleque.meutako.utils.Resource
+import javax.inject.Inject
 
-class TransactionViewModel(application: Application) : AndroidViewModel(application) {
-
-    private var transactionRepository: TransactionRepository = TransactionRepository()
+class TransactionViewModel @Inject constructor(private val transactionRepository: TransactionRepository) : ViewModel() {
 
     fun getTransactions(userUid: String, initialDate: Long, endDate: Long, orderDirection: Query.Direction): LiveData<Resource<List<Transaction>>> {
         val transactions: MutableLiveData<Resource<List<Transaction>>> = MutableLiveData()

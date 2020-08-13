@@ -1,6 +1,7 @@
 package com.udacity.maluleque.meutako.di
 
 import com.udacity.maluleque.meutako.SignInActivity
+import com.udacity.maluleque.meutako.TransactionListFragment
 import dagger.Component
 import javax.inject.Singleton
 
@@ -14,5 +15,6 @@ methods it expose. It generates the dependencies graph
 interface AppComponent {
 
     fun inject(signInActivity: SignInActivity)
+    fun inject(transactionListFragment: TransactionListFragment)
 
 }
