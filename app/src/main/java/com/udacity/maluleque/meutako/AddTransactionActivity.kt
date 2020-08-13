@@ -32,7 +32,6 @@ import butterknife.OnClick
 import com.google.android.gms.tasks.Task
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -47,6 +46,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 class AddTransactionActivity : AppCompatActivity() {
     @JvmField
@@ -88,20 +88,27 @@ class AddTransactionActivity : AppCompatActivity() {
     @JvmField
     @BindView(R.id.radioGroup)
     var radioGroup: RadioGroup? = null
+
+    @Inject
+    lateinit var db: FirebaseFirestore
+
+    @Inject
+    lateinit var storage: FirebaseStorage
+
+    @Inject
+    lateinit var user: FirebaseUser
+
     private var transactionType: String? = null
-    private var db: FirebaseFirestore? = null
     private var builder: AlertDialog.Builder? = null
     private var selectedCategory: String? = null
     private var date: Date? = null
     private val permissionsToRequest: ArrayList<String>? = null
     private val permissionsRejected: ArrayList<*> = ArrayList<Any?>()
     private val permissions: ArrayList<*> = ArrayList<Any?>()
-    private var storage: FirebaseStorage? = null
     private val imageBitmap: Bitmap? = null
     private lateinit var currentPhotoPath: String
     lateinit var photoFile: File
     private val fileUri: Uri? = null
-    private var user: FirebaseUser? = null
     private var transaction: Transaction? = null
     private var file: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,11 +117,11 @@ class AddTransactionActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         ButterKnife.bind(this)
+        (application as App).appComponent.inject(this)
+
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
-        user = FirebaseAuth.getInstance().currentUser
-        db = FirebaseFirestore.getInstance()
-        storage = FirebaseStorage.getInstance()
+
         val extras = intent.extras
         if (extras != null) {
             if (extras.containsKey(DetailsActivity.Companion.TRANSACTION)) {
@@ -122,7 +129,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 populateData(transaction)
             }
         }
-        radioGroup!!.setOnCheckedChangeListener { group: RadioGroup?, checkedId: Int ->
+        radioGroup!!.setOnCheckedChangeListener { _: RadioGroup?, checkedId: Int ->
             if (checkedId == R.id.radioButtonExpense) {
                 transactionType = EXPENSE
             } else if (checkedId == R.id.radioButtonIncome) {
@@ -137,7 +144,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 Toast.makeText(this, "Select the transaction type", Toast.LENGTH_SHORT).show()
             }
         }
-        dataInputText!!.setOnClickListener { v: View? -> selectDate() }
+        dataInputText!!.setOnClickListener { _: View? -> selectDate() }
         setDefaultDate()
     }
 
@@ -152,7 +159,7 @@ class AddTransactionActivity : AppCompatActivity() {
         val month = calendar[Calendar.MONTH]
         val year = calendar[Calendar.YEAR]
         val picker = DatePickerDialog(this,
-                OnDateSetListener { view: DatePicker?, year1: Int, monthOfYear: Int, dayOfMonth: Int ->
+                OnDateSetListener { _: DatePicker?, year1: Int, monthOfYear: Int, dayOfMonth: Int ->
                     calendar[year1, monthOfYear] = dayOfMonth
                     date = calendar.time
                     dataInputText!!.setText(DateUtils.formatDate(date))
@@ -162,7 +169,7 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun getCategories(transactionType: String) {
-        db!!.collection("categories").whereEqualTo("type", transactionType)
+        db.collection("categories").whereEqualTo("type", transactionType)
                 .get()
                 .addOnCompleteListener { task: Task<QuerySnapshot> ->
                     val categories = ArrayList<String>()
@@ -182,7 +189,7 @@ class AddTransactionActivity : AppCompatActivity() {
         val items = categories.toTypedArray()
         builder = AlertDialog.Builder(this)
         builder!!.setTitle(R.string.select_category)
-                .setItems(items) { dialog: DialogInterface?, which: Int ->
+                .setItems(items) { _: DialogInterface?, which: Int ->
                     categoryInputText!!.setText(categories[which])
                     selectedCategory = categories[which]
                 }
@@ -224,7 +231,7 @@ class AddTransactionActivity : AppCompatActivity() {
         }
         if (transaction.image != null) {
             if (!transaction.image!!.trim { it <= ' ' }.isEmpty()) {
-                storage!!.reference.child(transaction.image!!).downloadUrl.addOnSuccessListener { uri: Uri? ->
+                storage.reference.child(transaction.image!!).downloadUrl.addOnSuccessListener { uri: Uri? ->
                     Picasso.get()
                             .load(uri)
                             .centerCrop()
@@ -240,7 +247,7 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun saveTransaction() {
         var storageReference: StorageReference? = null
         if (file != null) {
-            storageReference = storage!!.reference.child("images").child(user!!.uid + "/" + file!!.lastPathSegment)
+            storageReference = storage.reference.child("images").child(user.uid + "/" + file!!.lastPathSegment)
             val uploadTask = storageReference.putFile(file!!)
             Log.d(TAG, "Path: " + storageReference.path)
             uploadTask.addOnFailureListener { exception ->
@@ -251,10 +258,10 @@ class AddTransactionActivity : AppCompatActivity() {
         if (isValidInput) {
             val document: DocumentReference
             if (transaction == null) {
-                document = db!!.collection("users").document(user!!.uid).collection("transactions").document()
+                document = db.collection("users").document(user.uid).collection("transactions").document()
                 transaction = Transaction()
             } else {
-                document = db!!.collection("users").document(user!!.uid).collection("transactions").document(transaction!!.uid!!)
+                document = db.collection("users").document(user.uid).collection("transactions").document(transaction!!.uid!!)
             }
             transaction!!.uid = document.id
             transaction!!.type = transactionType
@@ -263,9 +270,7 @@ class AddTransactionActivity : AppCompatActivity() {
             transaction!!.date = date!!.time
             transaction!!.description = descriptionInputText!!.text.toString()
             if (storageReference != null) {
-                if (storageReference.path != null) {
-                    transaction!!.image = storageReference.path
-                }
+                transaction!!.image = storageReference.path
             }
             document.set(transaction!!)
                     .addOnSuccessListener { aVoid: Void? ->
