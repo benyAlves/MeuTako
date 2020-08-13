@@ -1,16 +1,14 @@
 package com.udacity.maluleque.meutako.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.udacity.maluleque.meutako.model.User
 import com.udacity.maluleque.meutako.repository.AuthRepository
 import com.udacity.maluleque.meutako.utils.Resource
+import javax.inject.Inject
 
-class AuthViewModel(application: Application) : AndroidViewModel(application) {
-
-    private var authRepository: AuthRepository = AuthRepository()
+class AuthViewModel @Inject constructor(val authRepository: AuthRepository) : ViewModel() {
 
     fun saveUser(user: User): LiveData<Resource<User>> {
         val authenticatedUser: MutableLiveData<Resource<User>> = MutableLiveData()

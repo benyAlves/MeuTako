@@ -7,11 +7,14 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.udacity.maluleque.meutako.model.User
 import com.udacity.maluleque.meutako.utils.Resource
+import javax.inject.Inject
 
+/*
+@Inject tells dagger how to create AuthRepository
+and now dagger knows that AuthRepository has FirebaseFirestore dependency
+* */
+class AuthRepository @Inject constructor(val rootRef: FirebaseFirestore) {
 
-class AuthRepository {
-
-    private val rootRef = FirebaseFirestore.getInstance()
     private val usersRef = rootRef.collection("users")
 
     fun saveAuthenticatedUser(authenticatedUser: User): MutableLiveData<Resource<User>> {

@@ -17,8 +17,12 @@ import com.udacity.maluleque.meutako.model.User
 import com.udacity.maluleque.meutako.utils.Status
 import com.udacity.maluleque.meutako.viewmodel.AuthViewModel
 import java.util.*
+import javax.inject.Inject
 
 class SignInActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     var providers: List<IdpConfig>? = null
     lateinit var authViewModel: AuthViewModel
@@ -28,7 +32,9 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
 
-        authViewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
+        (application as App).appComponent.inject(this)
+
+        authViewModel = ViewModelProvider(this, viewModelFactory).get(AuthViewModel::class.java)
 
         providers = Arrays.asList(GoogleBuilder().build())
         val user = FirebaseAuth.getInstance().currentUser
