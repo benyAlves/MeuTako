@@ -92,31 +92,23 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayoutAmount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="@+id/textInputLayoutCategory"
-            app:layout_constraintStart_toStartOf="@+id/textInputLayoutCategory"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutCategory">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/amountInputText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/amount"
-                android:inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <ImageView
+            android:id="@+id/buttonAddCategory"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/sticky_background"
+            app:layout_constraintBottom_toBottomOf="@+id/textInputLayoutCategory"
+            app:layout_constraintEnd_toEndOf="@+id/radioGroup"
+            app:layout_constraintTop_toTopOf="@+id/textInputLayoutCategory"
+            app:srcCompat="@drawable/ic_add_white_24dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutCategory"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/buttonAddCategory"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/radioGroup">
 
@@ -146,6 +138,23 @@
                 android:gravity="top"
                 android:hint="@string/description"
                 android:inputType="textMultiLine" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayoutAmount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutCategory">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/amountInputText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/amount"
+                android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

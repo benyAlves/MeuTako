@@ -10,7 +10,7 @@ import com.bernardo.maluleque.shibaba.database.dao.TransactionDao
 import com.bernardo.maluleque.shibaba.model.Category
 import com.bernardo.maluleque.shibaba.model.Transaction
 
-@Database(entities = [Category::class, Transaction::class], version = 1, exportSchema = false)
+@Database(entities = [Category::class, Transaction::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class ShibabaDatabase : RoomDatabase() {
 
@@ -33,7 +33,8 @@ abstract class ShibabaDatabase : RoomDatabase() {
                         context.applicationContext,
                         ShibabaDatabase::class.java,
                         "word_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                        .build()
                 INSTANCE = instance
                 return instance
             }

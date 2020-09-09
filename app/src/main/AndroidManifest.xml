@@ -2,57 +2,43 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bernardo.maluleque.shibaba">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
     <application
-        android:name="com.bernardo.maluleque.shibaba.App"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".category.AddActivity"></activity>
         <activity
-            android:name="com.bernardo.maluleque.shibaba.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity">
-
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
-
         <activity
-            android:name="com.bernardo.maluleque.shibaba.DetailsActivity"
+            android:name=".DetailsActivity"
             android:label="@string/transaction_details"
-            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity">
-
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
         <activity
-            android:name="com.bernardo.maluleque.shibaba.ReportActivity"
-            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity"
+            android:name=".ReportActivity"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
-
         <activity
-            android:name="com.bernardo.maluleque.shibaba.AddTransactionActivity"
+            android:name=".AddTransactionActivity"
             android:label="@string/title_activity_add_transaction"
-            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -60,15 +46,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
-
-        <activity android:name="com.bernardo.maluleque.shibaba.SignInActivity" />
-
-
+        <activity android:name=".SignInActivity" />
         <activity
-            android:name="com.bernardo.maluleque.shibaba.MainActivity"
+            android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.bernardo.maluleque.shibaba.IntroActivity"
+            android:name=".IntroActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -86,9 +69,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
         <provider
-            android:name="com.bernardo.maluleque.shibaba.GenericFileProvider"
+            android:name=".GenericFileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -97,7 +79,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <receiver android:name="com.bernardo.maluleque.shibaba.widget.TransactionWidgetProvider">
+        <receiver android:name=".widget.TransactionWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -107,7 +89,17 @@
                 android:resource="@xml/widget_info" />
         </receiver>
 
-        <service android:name="com.bernardo.maluleque.shibaba.widget.TransactionViewService" />
+        <service android:name=".widget.TransactionViewService" />
     </application>
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

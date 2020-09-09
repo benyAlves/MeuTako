@@ -2,9 +2,11 @@ package com.bernardo.maluleque.shibaba.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.bernardo.maluleque.shibaba.database.dao.CategoryDao
 import com.bernardo.maluleque.shibaba.model.Category
 import com.bernardo.maluleque.shibaba.repository.CategoryRepository
+import kotlinx.coroutines.launch
 
 class CategoryViewModel(categoryDao: CategoryDao) : ViewModel() {
 
@@ -12,6 +14,11 @@ class CategoryViewModel(categoryDao: CategoryDao) : ViewModel() {
 
     fun getCategoriesByType(type: String): LiveData<List<Category>> {
         return repository.getCategories(type)
+    }
 
+    fun saveCategory(category: Category) {
+        viewModelScope.launch {
+            repository.insert(category)
+        }
     }
 }

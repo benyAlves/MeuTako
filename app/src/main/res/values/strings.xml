@@ -71,4 +71,6 @@
     <string name="available">Available</string>
     <string name="incomes">Incomes</string>
     <string name="action_logout">Logout</string>
+    <string name="category_type">Type</string>
+    <string name="category_name">Category Name</string>
 </resources>

@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -24,6 +25,8 @@ val appModule = module {
     single { FirebaseStorage.getInstance() as FirebaseStorage }
 
     single { FirebaseAuth.getInstance().currentUser!! as FirebaseUser }
+
+    single { ShibabaDatabase.getDatabase(androidContext()) as ShibabaDatabase }
 
     single { AuthRepository(get()) }
 

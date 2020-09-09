@@ -29,6 +29,7 @@ import androidx.core.content.FileProvider
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.bernardo.maluleque.shibaba.category.AddActivity
 import com.bernardo.maluleque.shibaba.model.Category
 import com.bernardo.maluleque.shibaba.model.Transaction
 import com.bernardo.maluleque.shibaba.utils.DateUtils
@@ -42,6 +43,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.content_add_transaction.*
 import org.koin.android.ext.android.inject
 import java.io.File
 import java.io.IOException
@@ -141,6 +143,8 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
         dataInputText!!.setOnClickListener { _: View? -> selectDate() }
+
+        buttonAddCategory.setOnClickListener { startActivity(Intent(this, AddActivity::class.java)) }
         setDefaultDate()
     }
 
