@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.udacity.maluleque.meutako">
+    package="com.bernardo.maluleque.shibaba">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name=".App"
+        android:name="com.bernardo.maluleque.shibaba.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -21,63 +21,54 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.bernardo.maluleque.shibaba.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
 
         <activity
-            android:name=".DetailsActivity"
+            android:name="com.bernardo.maluleque.shibaba.DetailsActivity"
             android:label="@string/transaction_details"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
         <activity
-            android:name=".ReportActivity"
-            android:parentActivityName=".MainActivity"
+            android:name="com.bernardo.maluleque.shibaba.ReportActivity"
+            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.udacity.maluleque.meutako.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
         <activity
-            android:name=".AddTransactionActivity"
+            android:name="com.bernardo.maluleque.shibaba.AddTransactionActivity"
             android:label="@string/title_activity_add_transaction"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.bernardo.maluleque.shibaba.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bernardo.maluleque.shibaba.MainActivity" />
         </activity>
 
+        <activity android:name="com.bernardo.maluleque.shibaba.SignInActivity" />
 
-        <activity android:name=".SignInActivity" />
+
         <activity
-            android:name=".MainActivity"
+            android:name="com.bernardo.maluleque.shibaba.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".IntroActivity"
+            android:name="com.bernardo.maluleque.shibaba.IntroActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -87,7 +78,17 @@
         </activity>
 
         <provider
-            android:name=".GenericFileProvider"
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.bernardo.maluleque.shibaba.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <provider
+            android:name="com.bernardo.maluleque.shibaba.GenericFileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -96,7 +97,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <receiver android:name=".widget.TransactionWidgetProvider">
+        <receiver android:name="com.bernardo.maluleque.shibaba.widget.TransactionWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -106,7 +107,7 @@
                 android:resource="@xml/widget_info" />
         </receiver>
 
-        <service android:name=".widget.TransactionViewService" />
+        <service android:name="com.bernardo.maluleque.shibaba.widget.TransactionViewService" />
     </application>
 
 </manifest>
