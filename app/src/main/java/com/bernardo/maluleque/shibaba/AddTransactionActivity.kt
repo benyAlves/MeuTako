@@ -16,35 +16,34 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.DatePicker
-import android.widget.ImageView
-import android.widget.RadioGroup
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Observer
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.bernardo.maluleque.shibaba.category.AddActivity
 import com.bernardo.maluleque.shibaba.model.Category
+import com.bernardo.maluleque.shibaba.model.CategoryType
 import com.bernardo.maluleque.shibaba.model.Transaction
 import com.bernardo.maluleque.shibaba.utils.DateUtils
-import com.google.android.gms.tasks.Task
+import com.bernardo.maluleque.shibaba.viewmodel.CategoryViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.content_add_transaction.*
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -97,9 +96,11 @@ class AddTransactionActivity : AppCompatActivity() {
 
     val user: FirebaseUser by inject()
 
-    private var transactionType: String? = null
+    val categoryViewModel: CategoryViewModel by viewModel()
+
+    private var transactionType: CategoryType? = null
     private var builder: AlertDialog.Builder? = null
-    private var selectedCategory: String? = null
+    private var selectedCategory: Category? = null
     private var date: Date? = null
     private val permissionsToRequest: ArrayList<String>? = null
     private val permissionsRejected: ArrayList<*> = ArrayList<Any?>()
@@ -129,9 +130,9 @@ class AddTransactionActivity : AppCompatActivity() {
         }
         radioGroup!!.setOnCheckedChangeListener { _: RadioGroup?, checkedId: Int ->
             if (checkedId == R.id.radioButtonExpense) {
-                transactionType = EXPENSE
+                transactionType = CategoryType.EXPENSE
             } else if (checkedId == R.id.radioButtonIncome) {
-                transactionType = INCOME
+                transactionType = CategoryType.INCOME
             }
             categoryInputText!!.text!!.clear()
         }
@@ -168,29 +169,19 @@ class AddTransactionActivity : AppCompatActivity() {
         picker.show()
     }
 
-    private fun getCategories(transactionType: String) {
-        db.collection("categories").whereEqualTo("type", transactionType)
-                .get()
-                .addOnCompleteListener { task: Task<QuerySnapshot> ->
-                    val categories = ArrayList<String>()
-                    if (task.isSuccessful) {
-                        for (document in task.result!!) {
-                            val category = document.toObject(Category::class.java)
-                            categories.add(category.name!!)
-                        }
-                        prepareCategoriesDialog(categories)
-                    } else {
-                        Log.e(TAG, "Error getting documents: ", task.exception)
-                    }
-                }
+    private fun getCategories(transactionType: CategoryType) {
+        categoryViewModel.getCategoriesByType(transactionType).observe(this, Observer {
+            prepareCategoriesDialog(it)
+        })
     }
 
-    private fun prepareCategoriesDialog(categories: ArrayList<String>) {
+    private fun prepareCategoriesDialog(categories: List<Category>) {
         val items = categories.toTypedArray()
+        val arrayAdapter = ArrayAdapter<Category>(this, android.R.layout.select_dialog_item, categories)
         builder = AlertDialog.Builder(this)
         builder!!.setTitle(R.string.select_category)
-                .setItems(items) { _: DialogInterface?, which: Int ->
-                    categoryInputText!!.setText(categories[which])
+                .setAdapter(arrayAdapter) { _: DialogInterface?, which: Int ->
+                    categoryInputText!!.setText(categories[which].name)
                     selectedCategory = categories[which]
                 }
         builder!!.create()
@@ -219,14 +210,14 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun populateData(transaction: Transaction?) {
-        transactionType = transaction!!.type
-        selectedCategory = transaction.category
-        descriptionInputText!!.setText(transaction.description)
+        //transactionType = transaction!!.type
+        //selectedCategory = transaction.category
+        descriptionInputText!!.setText(transaction!!.description)
         amountInputText!!.setText(transaction.amount.toString())
         categoryInputText!!.setText(transaction.category)
-        if (transactionType == INCOME) {
+        if (transactionType == CategoryType.INCOME) {
             radioGroup!!.check(R.id.radioButtonIncome)
-        } else if (transactionType == EXPENSE) {
+        } else if (transactionType == CategoryType.EXPENSE) {
             radioGroup!!.check(R.id.radioButtonExpense)
         }
         if (transaction.image != null) {
@@ -264,9 +255,9 @@ class AddTransactionActivity : AppCompatActivity() {
                 document = db.collection("users").document(user.uid).collection("transactions").document(transaction!!.uid!!)
             }
             transaction!!.uid = document.id
-            transaction!!.type = transactionType
+            transaction!!.type = transactionType!!.type
             transaction!!.amount = amountInputText!!.text.toString().toDouble()
-            transaction!!.category = selectedCategory
+            transaction!!.category = selectedCategory!!.name
             transaction!!.date = date!!.time
             transaction!!.description = descriptionInputText!!.text.toString()
             if (storageReference != null) {

@@ -2,13 +2,11 @@ package com.bernardo.maluleque.shibaba.model
 
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.bernardo.maluleque.shibaba.utils.DateUtils.getDataDayMonth
 import com.google.firebase.firestore.IgnoreExtraProperties
 
 @IgnoreExtraProperties
-@Entity
 class Transaction : Parcelable {
     @PrimaryKey
     lateinit var uid: String
