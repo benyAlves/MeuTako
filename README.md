@@ -1,4 +1,4 @@
-# MeuTako (Still in development, no mutch time right now)
+# MeuTako (Still in development, planning to redo from scratch with Jetpack Compose. No time right now)
 MeuTako allows users to track all finantial transactions in a few clicks and automatically generate monthly reports.
 
 ### Description
