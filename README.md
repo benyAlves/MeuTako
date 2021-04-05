@@ -1,4 +1,4 @@
-# MeuTako
+# MeuTako (Still in development, no mutch time right now)
 MeuTako allows users to track all finantial transactions in a few clicks and automatically generate monthly reports.
 
 ### Description
